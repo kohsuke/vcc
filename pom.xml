@@ -1,0 +1,35 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.java.dev.virtual-computer-control</groupId>
+        <artifactId>vcc-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../vcc-parent/</relativePath>
+    </parent>
+
+    <artifactId>vcc-msvm-impl</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Virtual Computer Control Microsoft VM implementation</name>
+    <url>https://virtual-computer-control.dev.java.net/</url>
+
+    <description>The Microsoft VM implementation of vcc-api</description>
+
+    <scm>
+        <connection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/vcc-msvm-impl/</connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/vcc-msvm-impl/
+        </developerConnection>
+        <url>https://virtual-computer-control.dev.java.net/source/browse/virtual-computer-control/trunk/vcc-msvm-impl/
+        </url>
+    </scm>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>vcc-api</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>
