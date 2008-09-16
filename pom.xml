@@ -1,25 +1,26 @@
 <project>
-  <modelVersion>4.0.0</modelVersion>
- 
-  <parent>
-    <groupId>net.java.dev.virtual-computer-control</groupId>
-    <artifactId>vcc-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-    <relativePath>../vcc-parent/</relativePath>
-  </parent>
-    
-  <artifactId>vcc-api</artifactId>
-  <packaging>jar</packaging>
+    <modelVersion>4.0.0</modelVersion>
 
-  <name>Virtual Computer Control API</name>
-  <url>https://virtual-computer-control.dev.java.net/</url>
+    <parent>
+        <groupId>net.java.dev.virtual-computer-control</groupId>
+        <artifactId>vcc-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../vcc-parent/</relativePath>
+    </parent>
 
-  <description>The API for control of virtual computers running on a virtual computer host</description>
+    <artifactId>vcc-api</artifactId>
+    <packaging>jar</packaging>
 
-  <scm>
-    <connection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/vcc-api/</connection>
-    <developerConnection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/vcc-api/</developerConnection>
-    <url>https://virtual-computer-control.dev.java.net/source/browse/virtual-computer-control/trunk/vcc-api/</url>
-  </scm>
+    <name>Virtual Computer Control API</name>
+    <url>https://virtual-computer-control.dev.java.net/</url>
+
+    <description>The API for control of virtual computers running on a virtual computer host</description>
+
+    <scm>
+        <connection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/vcc-api/</connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/vcc-api/
+        </developerConnection>
+        <url>https://virtual-computer-control.dev.java.net/source/browse/virtual-computer-control/trunk/vcc-api/</url>
+    </scm>
 
 </project>
