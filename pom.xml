@@ -1,33 +1,37 @@
 <project>
-  <modelVersion>4.0.0</modelVersion>
- 
-  <parent>
-    <groupId>net.java.dev.virtual-computer-control</groupId>
-    <artifactId>vcc-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-    <relativePath>../vcc-parent/</relativePath>
-  </parent>
-    
-  <artifactId>vcc-vmware-esx-impl</artifactId>
-  <packaging>jar</packaging>
+    <modelVersion>4.0.0</modelVersion>
 
-  <name>Virtual Computer Control VMware ESX implementation</name>
-  <url>https://virtual-computer-control.dev.java.net/</url>
+    <parent>
+        <groupId>net.java.dev.virtual-computer-control</groupId>
+        <artifactId>vcc-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../vcc-parent/</relativePath>
+    </parent>
 
-  <description>The API for control of virtual computers running on a virtual computer host</description>
+    <artifactId>vcc-vmware-esx-impl</artifactId>
+    <packaging>jar</packaging>
 
-  <scm>
-    <connection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/vcc-vmware-esx-impl/</connection>
-    <developerConnection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/vcc-vmware-esx-impl/</developerConnection>
-    <url>https://virtual-computer-control.dev.java.net/source/browse/virtual-computer-control/trunk/vcc-vmware-esx-impl/</url>
-  </scm>
+    <name>Virtual Computer Control VMware ESX implementation</name>
+    <url>https://virtual-computer-control.dev.java.net/</url>
 
-  <dependencies>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>vcc-api</artifactId>
-      <version>${project.parent.version}</version>
-    </dependency>
-  </dependencies>
+    <description>The VMware ESX implementation of vcc-api</description>
+
+    <scm>
+        <connection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/vcc-vmware-esx-impl/
+        </connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/vcc-vmware-esx-impl/
+        </developerConnection>
+        <url>
+            https://virtual-computer-control.dev.java.net/source/browse/virtual-computer-control/trunk/vcc-vmware-esx-impl/
+        </url>
+    </scm>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>vcc-api</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>
