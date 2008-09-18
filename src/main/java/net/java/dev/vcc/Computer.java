@@ -12,29 +12,58 @@ import java.util.concurrent.Future;
  */
 public interface Computer {
 
+    /**
+     * Gets the host that this computer is currently attached to.
+     * @return the host that this computer is currently attached to.
+     */
     Host getHost();
 
-    ComputerState getState();
+    /**
+     * Gets the power state of this computer.
+     * @return the power state of this computer.
+     */
+    PowerState getState();
 
+    /**
+     * Gets the snapshots of this computer that are currently available.
+     * @return the snapshots of this computer that are currently available.
+     */
     Set<ComputerSnapshot> getSnapshots();
 
-    Set<ComputerState> getAllowedStates();
-
+    /**
+     * Gets the hosts that this computer can be migrated to.
+     * @return the hosts that this computer can be migrated to.
+     */
     Set<Host> getAllowedHosts();
 
+    /**
+     * Gets the name of this virtual computer.
+     * @return the name of this virtual computer.
+     */
     String getName();
 
+    /**
+     * Gets the description of this virtual computer or {@code null} if descriptions are not supported.
+     * @return the description of this virtual computer or {@code null} if descriptions are not supported.
+     */
+    String getDescription();
+
+    /**
+     * Attempts to migrate the host to the specified host.
+     * @param destination the host to migrate to.
+     * @return a future for the operation being completed.
+     */
     Future<Boolean> doSetHost(Host destination);
 
-    Future<Boolean> doSetState(ComputerState state);
+    Future<Boolean> doSetState(PowerState state);
 
-    Future<ComputerState> doPowerOn();
+    Future<PowerState> doPowerOn();
 
-    Future<ComputerState> doPowerOff(boolean hard);
+    Future<PowerState> doPowerOff(boolean hard);
 
-    Future<ComputerState> doSuspend();
+    Future<PowerState> doSuspend();
 
-    Future<ComputerState> doResume();
+    Future<PowerState> doResume();
 
     Future<ComputerSnapshot> doTakeSnapshot(String suggestedName, String suggestedDescription);
 
