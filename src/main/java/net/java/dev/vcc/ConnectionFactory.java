@@ -4,21 +4,21 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Iterator;
 
-public final class VirtualComputerManagers {
+public final class ConnectionFactory {
 
-    private static final ServiceLoaderProxy<VirtualComputerManager> serviceLoader = ServiceLoaderProxy.load(VirtualComputerManager.class, getContextClassLoader());
+    private static final ServiceLoaderProxy<ConnectionProvider> serviceLoader = ServiceLoaderProxy.load(ConnectionProvider.class, getContextClassLoader());
 
 
     /**
      * Do not instantiate
      */
-    private VirtualComputerManagers() {
+    private ConnectionFactory() {
     }
 
     public static Connection getConnection(String url, String username, char[] password) {
-        Iterator<VirtualComputerManager> i = ServiceLoaderProxy.load(VirtualComputerManager.class, getContextClassLoader()).iterator();
+        Iterator<ConnectionProvider> i = ServiceLoaderProxy.load(ConnectionProvider.class, getContextClassLoader()).iterator();
         while (i.hasNext()) {
-            VirtualComputerManager manager = i.next();
+            ConnectionProvider manager = i.next();
             if (manager.acceptsUrl(url)) {
                 return manager.connect(url, username, password);
             }

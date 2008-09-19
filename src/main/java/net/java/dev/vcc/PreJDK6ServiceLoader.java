@@ -1,14 +1,14 @@
 package net.java.dev.vcc;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.*;
-import java.net.URL;
-import java.lang.reflect.Array;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Array;
+import java.net.URL;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class PreJDK6ServiceLoader<S> implements Adapter<S> {
 
@@ -26,7 +26,7 @@ class PreJDK6ServiceLoader<S> implements Adapter<S> {
      */
     @SuppressWarnings("unchecked")
     private static <T> T[] loadServices(Class<T> clazz, ClassLoader classLoader) {
-        final Logger LOGGER = Logger.getLogger(VirtualComputerManagers.class.getName());
+        final Logger LOGGER = Logger.getLogger(ConnectionFactory.class.getName());
 
         LOGGER.log(Level.FINEST, "loadServices({0},{1})", new Object[]{clazz, classLoader});
 
