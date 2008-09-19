@@ -35,6 +35,17 @@ public interface Connection {
      * @return the power states that a computer can be transitioned to.
      */
     Set<PowerState> getAllowedStates(PowerState from);
-    
+
+    /**
+     * Closes the connection releasing any handles.
+     */
+    void close();
+
+    /**
+     * Gets the state of the connection.
+     * @return {@code true} if the connection is open.
+     */
+    boolean isOpen();
+
 
 }
