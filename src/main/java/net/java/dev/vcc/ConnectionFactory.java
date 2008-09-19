@@ -4,10 +4,17 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Iterator;
 
+/**
+ * The connection factory creates connections with which to control Virtual Computers and their Hosts.
+ */
 public final class ConnectionFactory {
 
+    /**
+     * The service loader we're using
+     *
+     * @todo refactor so that we are lazy in getting this, and return the correct one for the calling classloader.
+     */
     private static final ServiceLoaderProxy<ConnectionProvider> serviceLoader = ServiceLoaderProxy.load(ConnectionProvider.class, getContextClassLoader());
-
 
     /**
      * Do not instantiate
@@ -15,6 +22,19 @@ public final class ConnectionFactory {
     private ConnectionFactory() {
     }
 
+    /**
+     * Gets a connection.
+     *
+     * @param url      The URL of the connection to get.
+     * @param username The username to authenticate with (may be {@code null} if the {@link ConnectionProvider} does not
+     *                 require quthenticaction.
+     * @param password The password to authenticate with (may be {@code null} if the {@link ConnectionProvider} does not
+     *                 require quthenticaction. (Note a char array is used in order to prevent the String of the password getting
+     *                 Interned.  The char array can be overwritten once it has been used to prevent memory probes from sniffing the
+     *                 password in clear text)
+     * @return The connection.
+     * @throws RuntimeException until we get our own exception for when we cannot get a connection.
+     */
     public static Connection getConnection(String url, String username, char[] password) {
         Iterator<ConnectionProvider> i = ServiceLoaderProxy.load(ConnectionProvider.class, getContextClassLoader()).iterator();
         while (i.hasNext()) {
