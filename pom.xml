@@ -15,6 +15,16 @@
         <url>https://virtual-computer-control.dev.java.net/source/browse/virtual-computer-control/trunk/vcc-parent</url>
     </scm>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.4</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <build>
         <pluginManagement>
             <plugins>
