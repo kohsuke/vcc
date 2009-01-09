@@ -43,6 +43,12 @@
         </mailingList>
     </mailingLists>
 
+    <issueManagement>
+        <system>java.net</system>
+        <url>https://virtual-computer-control.dev.java.net/servlets/ProjectIssues</url>
+    </issueManagement>
+
+
     <dependencyManagement>
         <dependencies>
             <dependency>
