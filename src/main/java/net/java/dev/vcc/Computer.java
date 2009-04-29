@@ -6,7 +6,8 @@ import java.util.concurrent.Future;
 /**
  * Represents a Virtual Computer.
  */
-public interface Computer {
+public interface Computer
+{
 
     /**
      * Gets the host that this computer is currently attached to.
@@ -16,6 +17,25 @@ public interface Computer {
     Host getHost();
 
     /**
+     * Returns {@code true} if the host of this computer is currently changing.
+     *
+     * @return {@code true} if the host of this computer is currently changing.
+     */
+    boolean isHostChanging();
+
+    /**
+     * If {@link #isHostChanging()} is {@code true} then this method returns a {@link Future}
+     * for the {@link Host} that the computer is migrating to, otherwise this method will return a completed
+     * {@link Future} for the current {@link Host}.  When the host is changing, the future will be completed
+     * when the host migration has completed, thus allowing a consumer of the API to
+     * be notified when a host migration has completed.
+     *
+     * @return Either a completed {@link Future} for the current host, or a {@link Future} that
+     *         will complete when the computer has finished migrating to a new host.
+     */
+    Future<Host> getFutureHost();
+
+    /**
      * Gets the power state of this computer.
      *
      * @return the power state of this computer.
@@ -23,19 +43,23 @@ public interface Computer {
     PowerState getState();
 
     /**
-     * Gets the previous power state of this computer.
+     * Returns {@code true} if the state of this computer is currently changing.
      *
-     * @return the previous power state of this computer.
+     * @return {@code true} if the state of this computer is currently changing.
      */
-    PowerState getPreviousState();
+    boolean isStateChanging();
 
     /**
-     * Gets the next power state of this computer. This will always be {@link PowerState#UNKNOWN} unless
-     * {@link #getState()} == {@link PowerState#TRANSITIONAL}
+     * If {@link #isStateChanging()} is {@code true} then this method returns a {@link Future}
+     * for the state that the computer is transitioning into, otherwise this method will return a completed
+     * {@link Future} for the current state.  When the state is changing, the future will be completed
+     * when the state transition has completed, thus allowing a consumer of the API to
+     * be notified when a power state change has completed.
      *
-     * @return the next power state of this computer.
+     * @return Either a completed {@link Future} for the current state, or a {@link Future} that
+     *         will complete when the state has finished changing.
      */
-    PowerState getNextState();
+    Future<PowerState> getFutureState();
 
     /**
      * Gets the snapshots of this computer that are currently available.
@@ -71,7 +95,7 @@ public interface Computer {
      * @param destination the host to migrate to.
      * @return a future for the operation being completed.
      */
-    Future<Boolean> doMigrate(Host destination);
+    Future<Boolean> doMigrate( Host destination );
 
     /**
      * Powers on the virtual computer.
@@ -96,7 +120,7 @@ public interface Computer {
      *             a good operating system will notice and initiate an orderly shutdown)
      * @return a future for the operation being completed.
      */
-    Future<PowerState> doPowerOff(boolean hard);
+    Future<PowerState> doPowerOff( boolean hard );
 
     /**
      * Suspends the virtual machine.
@@ -127,7 +151,7 @@ public interface Computer {
      * @param suggestedDescription The description to try and assign to the snapshot.
      * @return a future for the operation being completed.
      */
-    Future<ComputerSnapshot> doTakeSnapshot(String suggestedName, String suggestedDescription);
+    Future<ComputerSnapshot> doTakeSnapshot( String suggestedName, String suggestedDescription );
 
     /**
      * Reverts the virtual computer to the specified snapshot.
@@ -135,5 +159,5 @@ public interface Computer {
      * @param snapshot the snapshot to revert to.
      * @return a future for the operation being completed.
      */
-    Future<Boolean> doRevertToSnapshot(ComputerSnapshot snapshot);
+    Future<Boolean> doRevertToSnapshot( ComputerSnapshot snapshot );
 }
