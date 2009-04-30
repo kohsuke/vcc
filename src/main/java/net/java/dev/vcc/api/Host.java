@@ -1,4 +1,4 @@
-package net.java.dev.vcc;
+package net.java.dev.vcc.api;
 
 import java.util.Set;
 
@@ -9,7 +9,8 @@ import java.util.Set;
  * Time: 08:26:36
  * To change this template use File | Settings | File Templates.
  */
-public interface Host {
+public interface Host
+{
 
     Set<Computer> getComputers();
 

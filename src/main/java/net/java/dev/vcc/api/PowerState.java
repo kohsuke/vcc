@@ -1,4 +1,4 @@
-package net.java.dev.vcc;
+package net.java.dev.vcc.api;
 
 /**
  * Represents the power states of a virtual machine.

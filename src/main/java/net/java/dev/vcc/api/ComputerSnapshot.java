@@ -1,4 +1,4 @@
-package net.java.dev.vcc;
+package net.java.dev.vcc.api;
 
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -6,7 +6,8 @@ import java.util.concurrent.Future;
 /**
  * Represents a snapshot of a virtual computer.
  */
-public interface ComputerSnapshot {
+public interface ComputerSnapshot
+{
 
     /**
      * Gets the name of the snapshot.
@@ -28,7 +29,7 @@ public interface ComputerSnapshot {
      * @param name the new name.
      * @return a future for the operation which will return {@code Boolean.TRUE} if the operation was successful.
      */
-    Future<Boolean> doRename(String name);
+    Future<Boolean> doRename( String name );
 
     /**
      * Attempts to modify the description of the snapshot.
@@ -36,7 +37,7 @@ public interface ComputerSnapshot {
      * @param description the new description.
      * @return a future for the operation which will return {@code Boolean.TRUE} if the operation was successful.
      */
-    Future<Boolean> doSetDescription(String description);
+    Future<Boolean> doSetDescription( String description );
 
     /**
      * Attempts to delete the snapshot.

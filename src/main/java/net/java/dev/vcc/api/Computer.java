@@ -1,4 +1,4 @@
-package net.java.dev.vcc;
+package net.java.dev.vcc.api;
 
 import java.util.Set;
 import java.util.concurrent.Future;
