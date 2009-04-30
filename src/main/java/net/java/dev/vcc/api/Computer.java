@@ -6,8 +6,7 @@ import java.util.concurrent.Future;
 /**
  * Represents a Virtual Computer.
  */
-public interface Computer
-{
+public interface Computer {
 
     /**
      * Gets the host that this computer is currently attached to.
@@ -95,7 +94,7 @@ public interface Computer
      * @param destination the host to migrate to.
      * @return a future for the operation being completed.
      */
-    Future<Boolean> doMigrate( Host destination );
+    Future<Boolean> doMigrate(Host destination);
 
     /**
      * Powers on the virtual computer.
@@ -120,7 +119,7 @@ public interface Computer
      *             a good operating system will notice and initiate an orderly shutdown)
      * @return a future for the operation being completed.
      */
-    Future<PowerState> doPowerOff( boolean hard );
+    Future<PowerState> doPowerOff(boolean hard);
 
     /**
      * Suspends the virtual machine.
@@ -151,7 +150,7 @@ public interface Computer
      * @param suggestedDescription The description to try and assign to the snapshot.
      * @return a future for the operation being completed.
      */
-    Future<ComputerSnapshot> doTakeSnapshot( String suggestedName, String suggestedDescription );
+    Future<ComputerSnapshot> doTakeSnapshot(String suggestedName, String suggestedDescription);
 
     /**
      * Reverts the virtual computer to the specified snapshot.
@@ -159,5 +158,5 @@ public interface Computer
      * @param snapshot the snapshot to revert to.
      * @return a future for the operation being completed.
      */
-    Future<Boolean> doRevertToSnapshot( ComputerSnapshot snapshot );
+    Future<Boolean> doRevertToSnapshot(ComputerSnapshot snapshot);
 }

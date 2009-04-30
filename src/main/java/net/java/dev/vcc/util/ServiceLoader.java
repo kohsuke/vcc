@@ -9,8 +9,7 @@ import java.util.Iterator;
  * Time: 17:12:48
  * To change this template use File | Settings | File Templates.
  */
-interface ServiceLoader<S>
-{
+interface ServiceLoader<S> {
     void reload();
 
     Iterator<S> iterator();

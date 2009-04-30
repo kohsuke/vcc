@@ -8,14 +8,12 @@ import org.hamcrest.core.IsNull;
 import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
-public class SmokeTest
-{
+public class SmokeTest {
 
     @Test
-    public void smokes()
-    {
-        final Datacenter datacenter = DatacenterManager.getConnection( "vcc:crappy:localhost", "", "".toCharArray() );
-        assertThat( datacenter, IsNull.notNullValue() );
-        assertThat( datacenter, Is.is( CrappyDatacenter.class ) );
+    public void smokes() {
+        final Datacenter datacenter = DatacenterManager.getConnection("vcc:crappy:localhost", "", "".toCharArray());
+        assertThat(datacenter, IsNull.notNullValue());
+        assertThat(datacenter, Is.is(CrappyDatacenter.class));
     }
 }

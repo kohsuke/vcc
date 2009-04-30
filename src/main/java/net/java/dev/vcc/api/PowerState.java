@@ -3,8 +3,7 @@ package net.java.dev.vcc.api;
 /**
  * Represents the power states of a virtual machine.
  */
-public enum PowerState
-{
+public enum PowerState {
     /**
      * The virtual machine has been powered off, to power it on again will
      * require going through the BIOS boot sequence.

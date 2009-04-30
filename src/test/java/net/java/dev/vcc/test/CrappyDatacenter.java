@@ -15,35 +15,28 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class CrappyDatacenter
-    implements Datacenter
-{
-    public Set<Host> getHosts()
-    {
+        implements Datacenter {
+    public Set<Host> getHosts() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public Set<Computer> getComputers()
-    {
+    public Set<Computer> getComputers() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public Set<PowerState> getAllowedStates()
-    {
+    public Set<PowerState> getAllowedStates() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public Set<PowerState> getAllowedStates( PowerState from )
-    {
+    public Set<PowerState> getAllowedStates(PowerState from) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public void close()
-    {
+    public void close() {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public boolean isOpen()
-    {
+    public boolean isOpen() {
         return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

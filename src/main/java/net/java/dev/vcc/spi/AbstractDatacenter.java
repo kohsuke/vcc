@@ -10,6 +10,5 @@ import net.java.dev.vcc.api.Datacenter;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class AbstractDatacenter
-    implements Datacenter
-{
+        implements Datacenter {
 }

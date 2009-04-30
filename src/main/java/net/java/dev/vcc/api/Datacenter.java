@@ -7,8 +7,7 @@ import java.util.Set;
  *
  * @author Stephen Connolly
  */
-public interface Datacenter
-{
+public interface Datacenter {
 
     /**
      * Gets all the hosts available for running virtual computers that are controlled by this connection.
@@ -37,7 +36,7 @@ public interface Datacenter
      * @param from the power state to transition from.
      * @return the power states that a computer can be transitioned to.
      */
-    Set<PowerState> getAllowedStates( PowerState from );
+    Set<PowerState> getAllowedStates(PowerState from);
 
     /**
      * Closes the connection releasing any handles.

@@ -10,8 +10,7 @@ import java.util.Iterator;
 /**
  * The connection factory creates connections with which to control Virtual Computers and their Hosts.
  */
-public final class DatacenterManager
-{
+public final class DatacenterManager {
 
     /**
      * The service loader we're using
@@ -19,13 +18,12 @@ public final class DatacenterManager
      * @todo refactor so that we are lazy in getting this, and return the correct one for the calling classloader.
      */
     private static final ServiceLoaderProxy<DatacenterConnection> serviceLoader =
-        ServiceLoaderProxy.load( DatacenterConnection.class, getContextClassLoader() );
+            ServiceLoaderProxy.load(DatacenterConnection.class, getContextClassLoader());
 
     /**
      * Do not instantiate
      */
-    private DatacenterManager()
-    {
+    private DatacenterManager() {
     }
 
     /**
@@ -41,19 +39,16 @@ public final class DatacenterManager
      * @return The connection.
      * @throws RuntimeException until we get our own exception for when we cannot get a connection.
      */
-    public static Datacenter getConnection( String url, String username, char[] password )
-    {
+    public static Datacenter getConnection(String url, String username, char[] password) {
         Iterator<DatacenterConnection> i =
-            ServiceLoaderProxy.load( DatacenterConnection.class, getContextClassLoader() ).iterator();
-        while ( i.hasNext() )
-        {
+                ServiceLoaderProxy.load(DatacenterConnection.class, getContextClassLoader()).iterator();
+        while (i.hasNext()) {
             DatacenterConnection manager = i.next();
-            if ( manager.acceptsUrl( url ) )
-            {
-                return manager.connect( url, username, password );
+            if (manager.acceptsUrl(url)) {
+                return manager.connect(url, username, password);
             }
         }
-        throw new RuntimeException( "give this a real exception" ); // TODO
+        throw new RuntimeException("give this a real exception"); // TODO
     }
 
 
@@ -63,26 +58,22 @@ public final class DatacenterManager
      * @return the contextClassLoader (type ClassLoader) of the current thread.
      */
     @SuppressWarnings("unchecked")
-    private static ClassLoader getContextClassLoader()
-    {
-        return (ClassLoader) AccessController.doPrivileged( new PrivilegedAction()
-        {
+    private static ClassLoader getContextClassLoader() {
+        return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
             /** {@inheritDoc} */
-            public Object run()
-            {
+            public Object run() {
                 ClassLoader cl = null;
                 //try {
                 cl = Thread.currentThread().getContextClassLoader();
                 //} catch (SecurityException ex) { }
 
-                if ( cl == null )
-                {
+                if (cl == null) {
                     cl = ClassLoader.getSystemClassLoader();
                 }
 
                 return cl;
             }
-        } );
+        });
     }
 
 }
