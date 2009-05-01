@@ -1,42 +1,103 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>net.java.dev.virtual-computer-control.thirdparty</groupId>
-        <artifactId>thirdparty</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-        <relativePath>..</relativePath>
-    </parent>
-
+    <groupId>net.java.dev.virtual-computer-control.thirdparty</groupId>
     <artifactId>xen-api</artifactId>
+    <version>5.0.0-3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>XenServer Java API</name>
+    <name>Citrix XenServer SDK for Java</name>
 
-    <description>The XenServer Java API</description>
+    <description>This is a Mavenized build of the XenServer Java API.</description>
 
+    <url>http://community.citrix.com/cdn/xs/sdks</url>
+
+    <organization>
+        <name>Citrix Community</name>
+        <url>http://community.citrix.com/</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>Citrix Systems License for XenSource Java API</name>
+            <url>file://${basedir}/LICENSE.txt</url>
+            <distribution>repo</distribution>
+        </license>
+        <license>
+            <name>GNU General Public License, version 2</name>
+            <url>http://www.gnu.org/licenses/gpl-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/thirdparty/xen-api/</connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/thirdparty/xen-api/</developerConnection>
+        <url>https://virtual-computer-control.dev.java.net/source/browse/virtual-computer-control/trunk/thirdparty/xen-api/</url>
+    </scm>
+
+    <mailingLists>
+        <mailingList>
+            <name>Development List</name>
+            <subscribe>dev-subscribe@virtual-computer-control.dev.java.net</subscribe>
+            <unsubscribe>dev-unsubscribe@virtual-computer-control.dev.java.net</unsubscribe>
+            <post>dev@virtual-computer-control.dev.java.net</post>
+            <archive>http://n2.nabble.com/Java-Virtual-Computer-Control-API-Developers-List-f2130245.html</archive>
+        </mailingList>
+        <mailingList>
+            <name>Commits List</name>
+            <subscribe>commits-subscribe@virtual-computer-control.dev.java.net</subscribe>
+            <unsubscribe>commits-unsubscribe@virtual-computer-control.dev.java.net</unsubscribe>
+        </mailingList>
+    </mailingLists>
+
+    <issueManagement>
+        <system>a forum</system>
+        <url>http://forums.citrix.com/forum.jspa?forumID=175&amp;start=0</url>
+    </issueManagement>
+ 
     <dependencies>
-<dependency>
-    <groupId>org.apache.xmlrpc</groupId>
-    <artifactId>xmlrpc-client</artifactId>
-    <version>3.1</version>
-</dependency> 
-<dependency>
-    <groupId>org.apache.xmlrpc</groupId>
-    <artifactId>xmlrpc-common</artifactId>
-    <version>3.1</version>
-</dependency> 
-<dependency>
-    <groupId>org.apache.ws.commons.util</groupId>
-    <artifactId>ws-commons-util</artifactId>
-    <version>1.0.2</version>
-</dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.4</version>
-            <scope>test</scope>
+            <groupId>org.apache.xmlrpc</groupId>
+            <artifactId>xmlrpc-client</artifactId>
+            <version>3.1</version>
+        </dependency> 
+        <dependency>
+            <groupId>org.apache.xmlrpc</groupId>
+            <artifactId>xmlrpc-common</artifactId>
+            <version>3.1</version>
+        </dependency> 
+        <dependency>
+            <groupId>org.apache.ws.commons.util</groupId>
+            <artifactId>ws-commons-util</artifactId>
+            <version>1.0.2</version>
+            <exclusions>
+                <!-- not needed at runtime -->
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+                <!-- included by default in at least JDK5+ -->
+                <exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>1.5</source>
+                        <target>1.5</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 </project>
