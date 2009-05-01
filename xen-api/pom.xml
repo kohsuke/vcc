@@ -1,0 +1,42 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.java.dev.virtual-computer-control.thirdparty</groupId>
+        <artifactId>thirdparty</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>..</relativePath>
+    </parent>
+
+    <artifactId>xen-api</artifactId>
+    <packaging>jar</packaging>
+
+    <name>XenServer Java API</name>
+
+    <description>The XenServer Java API</description>
+
+    <dependencies>
+<dependency>
+    <groupId>org.apache.xmlrpc</groupId>
+    <artifactId>xmlrpc-client</artifactId>
+    <version>3.1</version>
+</dependency> 
+<dependency>
+    <groupId>org.apache.xmlrpc</groupId>
+    <artifactId>xmlrpc-common</artifactId>
+    <version>3.1</version>
+</dependency> 
+<dependency>
+    <groupId>org.apache.ws.commons.util</groupId>
+    <artifactId>ws-commons-util</artifactId>
+    <version>1.0.2</version>
+</dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.4</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>
