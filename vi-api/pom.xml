@@ -42,6 +42,12 @@
     </dependencies>
 
     <build>
+        <resources combine.children="append">
+            <resource>
+                <directory>${basedir}/src/main/wsdl</directory>
+                <targetPath>com/vmware</targetPath>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -49,16 +55,35 @@
                 <version>1.12</version>
                 <executions>
                     <execution>
+                        <id>vim25</id>
                         <goals>
                             <goal>wsimport</goal>
                         </goals>
                         <configuration>
+                            <staleFile>${project.build.directory}/jaxws/stale/.staleFlag-vim25</staleFile>
                             <packageName>com.vmware.vim25</packageName>
                             <target>2.0</target>
-                            <wsdlDirectory>src/main/wsdl</wsdlDirectory>
+                            <wsdlDirectory>${basedir}/src/main/wsdl</wsdlDirectory>
                             <wsdlFiles>
                                 <wsdlFile>vim25/vimService.wsdl</wsdlFile>
                             </wsdlFiles>
+                            <wsdlLocation>vimService.wsdl</wsdlLocation>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>vim</id>
+                        <goals>
+                            <goal>wsimport</goal>
+                        </goals>
+                        <configuration>
+                            <staleFile>${project.build.directory}/jaxws/stale/.staleFlag-vim</staleFile>
+                            <packageName>com.vmware.vim</packageName>
+                            <target>2.0</target>
+                            <wsdlDirectory>${basedir}/src/main/wsdl</wsdlDirectory>
+                            <wsdlFiles>
+                                <wsdlFile>vim/vimService.wsdl</wsdlFile>
+                            </wsdlFiles>
+                            <wsdlLocation>vimService.wsdl</wsdlLocation>
                         </configuration>
                     </execution>
                 </executions>
