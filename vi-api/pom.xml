@@ -53,6 +53,11 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jaxws-maven-plugin</artifactId>
                 <version>1.10</version>
+                <configuration>
+                    <target>2.0</target>
+                    <xnocompile>true</xnocompile>
+                    <wsdlDirectory>${basedir}/src/main/wsdl</wsdlDirectory>
+                </configuration>
                 <executions>
                     <execution>
                         <id>vim25</id>
@@ -62,8 +67,6 @@
                         <configuration>
                             <staleFile>${project.build.directory}/jaxws/stale/.staleFlag-vim25</staleFile>
                             <packageName>com.vmware.vim25</packageName>
-                            <target>2.0</target>
-                            <wsdlDirectory>${basedir}/src/main/wsdl</wsdlDirectory>
                             <wsdlFiles>
                                 <wsdlFile>vim25/vimService.wsdl</wsdlFile>
                             </wsdlFiles>
@@ -78,8 +81,6 @@
                         <configuration>
                             <staleFile>${project.build.directory}/jaxws/stale/.staleFlag-vim</staleFile>
                             <packageName>com.vmware.vim</packageName>
-                            <target>2.0</target>
-                            <wsdlDirectory>${basedir}/src/main/wsdl</wsdlDirectory>
                             <wsdlFiles>
                                 <wsdlFile>vim/vimService.wsdl</wsdlFile>
                             </wsdlFiles>
