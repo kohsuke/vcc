@@ -26,4 +26,5 @@ public enum PowerState {
     /**
      * The virtual machine's state is in memory and active.
      */
-    RUNNING, }
+    RUNNING,
+}
