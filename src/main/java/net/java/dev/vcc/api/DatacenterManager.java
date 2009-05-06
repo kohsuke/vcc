@@ -2,6 +2,7 @@ package net.java.dev.vcc.api;
 
 import net.java.dev.vcc.spi.DatacenterConnection;
 import net.java.dev.vcc.util.ServiceLoaderProxy;
+import net.java.dev.vcc.util.ServiceLoaderCache;
 
 import java.lang.ref.WeakReference;
 import java.security.AccessController;
@@ -19,35 +20,13 @@ public final class DatacenterManager {
      * A weak cache of service loader proxies that should allow unloading without a permgen leak (I hope).
      * Guarded by itself.
      */
-    private static final Map<ClassLoader, WeakReference<ServiceLoaderProxy<DatacenterConnection>>> serviceLoaderCache =
-            new WeakHashMap<ClassLoader, WeakReference<ServiceLoaderProxy<DatacenterConnection>>>();
+    private static final ServiceLoaderCache<DatacenterConnection> cache = 
+            new ServiceLoaderCache<DatacenterConnection>(DatacenterConnection.class);
 
     /**
      * Do not instantiate
      */
     private DatacenterManager() {
-    }
-
-    /**
-     * Gets the {@link ServiceLoaderProxy} from the weak cache, or creates a new one if needed.
-     *
-     * @param classloader The classloader we are to get the {@link ServiceLoaderProxy} from.
-     * @return The {@link ServiceLoaderProxy} for the specified classloader.
-     */
-    private static ServiceLoaderProxy<DatacenterConnection> getServiceLoader(ClassLoader classloader) {
-        synchronized (serviceLoaderCache) {
-            WeakReference<ServiceLoaderProxy<DatacenterConnection>> ref = serviceLoaderCache.get(classloader);
-            if (ref != null) {
-                final ServiceLoaderProxy<DatacenterConnection> result = ref.get();
-                if (result != null) {
-                    return result;
-                }
-            }
-            final ServiceLoaderProxy<DatacenterConnection> result =
-                    ServiceLoaderProxy.load(DatacenterConnection.class, classloader);
-            serviceLoaderCache.put(classloader, new WeakReference<ServiceLoaderProxy<DatacenterConnection>>(result));
-            return result;
-        }
     }
 
     /**
@@ -82,7 +61,7 @@ public final class DatacenterManager {
      * @throws RuntimeException until we get our own exception for when we cannot get a connection.
      */
     public static Datacenter getConnection(ClassLoader classLoader, String url, String username, char[] password) {
-        Iterator<DatacenterConnection> i = getServiceLoader(classLoader).iterator();
+        Iterator<DatacenterConnection> i = cache.get(classLoader).iterator();
         while (i.hasNext()) {
             DatacenterConnection manager = i.next();
             if (manager.acceptsUrl(url)) {
