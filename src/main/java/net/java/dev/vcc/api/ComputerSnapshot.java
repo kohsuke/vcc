@@ -6,7 +6,7 @@ import java.util.concurrent.Future;
 /**
  * Represents a snapshot of a virtual computer.
  */
-public interface ComputerSnapshot {
+public interface ComputerSnapshot  extends ManagedObject {
 
     /**
      * Gets the name of the snapshot.

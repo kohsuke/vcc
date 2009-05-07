@@ -9,7 +9,7 @@ import java.util.Set;
  * Time: 08:26:36
  * To change this template use File | Settings | File Templates.
  */
-public interface Host {
+public interface Host  extends ManagedObject {
 
     Set<Computer> getComputers();
 

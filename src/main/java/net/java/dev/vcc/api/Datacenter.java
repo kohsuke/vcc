@@ -7,7 +7,7 @@ import java.util.Set;
  *
  * @author Stephen Connolly
  */
-public interface Datacenter {
+public interface Datacenter extends ManagedObject {
 
     /**
      * Gets all the hosts available for running virtual computers that are controlled by this connection.
