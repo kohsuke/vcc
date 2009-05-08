@@ -1,6 +1,6 @@
 package net.java.dev.vcc.test;
 
-import net.java.dev.vcc.api.Datacenter;
+import net.java.dev.vcc.spi.AbstractDatacenter;
 import net.java.dev.vcc.spi.DatacenterConnection;
 
 public class CrappyDatacenterConnection
@@ -9,7 +9,7 @@ public class CrappyDatacenterConnection
         return url.startsWith("vcc:crappy:");
     }
 
-    public Datacenter connect(String url, String username, char[] password) {
+    public AbstractDatacenter connect(String url, String username, char[] password) {
         return new CrappyDatacenter();
     }
 }
