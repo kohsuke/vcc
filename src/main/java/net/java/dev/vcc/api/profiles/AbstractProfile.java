@@ -1,20 +1,18 @@
-package net.java.dev.vcc.spi;
+package net.java.dev.vcc.api.profiles;
 
-import net.java.dev.vcc.api.Datacenter;
-import net.java.dev.vcc.api.ManagedObject;
-import net.java.dev.vcc.api.Command;
 import net.java.dev.vcc.api.CapabilityProfile;
+import net.java.dev.vcc.api.Command;
+import net.java.dev.vcc.api.ManagedObject;
 
 import java.util.*;
 
 /**
- * The base class from which all Service Provider Implementations map a connection from.
+ * A base class for all the standard profiles
  */
-public abstract class AbstractDatacenter implements Datacenter {
-    
+class AbstractProfile implements CapabilityProfile {
     private final Map<Class<? extends ManagedObject>, Set<Class<? extends Command>>> capabilities;
 
-    public AbstractDatacenter(Map.Entry<Class<? extends ManagedObject>, Set<Class<? extends Command>>>... capabilities) {
+    public AbstractProfile(Map.Entry<Class<? extends ManagedObject>, Set<Class<? extends Command>>>... capabilities) {
         Map<Class<? extends ManagedObject>, Set<Class<? extends Command>>> tmp
                 = new HashMap<Class<? extends ManagedObject>, Set<Class<? extends Command>>>(capabilities.length);
         for (Map.Entry<Class<? extends ManagedObject>, Set<Class<? extends Command>>> capability : capabilities) {
@@ -23,7 +21,7 @@ public abstract class AbstractDatacenter implements Datacenter {
         this.capabilities = Collections.unmodifiableMap(tmp);
     }
 
-    public AbstractDatacenter(CapabilityProfile base, Map.Entry<Class<? extends ManagedObject>, Set<Class<? extends Command>>>... capabilities) {
+    public AbstractProfile(CapabilityProfile base, Map.Entry<Class<? extends ManagedObject>, Set<Class<? extends Command>>>... capabilities) {
         Map<Class<? extends ManagedObject>, Set<Class<? extends Command>>> tmp
                 = new HashMap<Class<? extends ManagedObject>, Set<Class<? extends Command>>>(capabilities.length);
         for (Map.Entry<Class<? extends ManagedObject>, Set<Class<? extends Command>>> capability : capabilities) {
@@ -39,7 +37,7 @@ public abstract class AbstractDatacenter implements Datacenter {
         this.capabilities = Collections.unmodifiableMap(tmp);
     }
 
-    public AbstractDatacenter(boolean ignore, CapabilityProfile... bases) {
+    public AbstractProfile(CapabilityProfile... bases) {
         Map<Class<? extends ManagedObject>, Set<Class<? extends Command>>> tmp
                 = new HashMap<Class<? extends ManagedObject>, Set<Class<? extends Command>>>();
         for (CapabilityProfile base : bases) {
@@ -87,7 +85,53 @@ public abstract class AbstractDatacenter implements Datacenter {
     public final Set<Class<? extends ManagedObject>> getObjectClasses() {
         return capabilities.keySet();
     }
-    
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof CapabilityProfile)) {
+            return false;
+        }
+
+        CapabilityProfile that = (CapabilityProfile) o;
+
+        if (!capabilities.keySet().equals(that.getObjectClasses())) return false;
+        for (Class<? extends ManagedObject> b : capabilities.keySet()) {
+            if (!capabilities.get(b).equals(that.getCommands(b))) return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns {@code true} if this {@link net.java.dev.vcc.api.CapabilityProfile} is supported by the
+     * supplied {@link net.java.dev.vcc.api.CapabilityProfile}.
+     *
+     * @param that The {@link net.java.dev.vcc.api.CapabilityProfile} which this may be a subset of.
+     * @return {@code true} if this {@link net.java.dev.vcc.api.CapabilityProfile} is supported by the
+     *         supplied {@link net.java.dev.vcc.api.CapabilityProfile}.
+     */
+    public final boolean supportedBy(CapabilityProfile that) {
+        if (this == that) {
+            return true;
+        }
+        if (!capabilities.keySet().containsAll(that.getObjectClasses())) {
+            return false;
+        }
+        for (Class<? extends ManagedObject> b : capabilities.keySet()) {
+            if (!capabilities.get(b).containsAll(that.getCommands(b))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -107,4 +151,42 @@ public abstract class AbstractDatacenter implements Datacenter {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        return capabilities.keySet().hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String toString() {
+        StringBuilder buf = new StringBuilder(512);
+        buf.append("Profile[");
+        boolean first = true;
+        for (Map.Entry<Class<? extends ManagedObject>, Set<Class<? extends Command>>> b : capabilities.entrySet()) {
+            if (!first) {
+                buf.append(", ");
+            } else {
+                first = false;
+            }
+            buf.append(b.getKey().getSimpleName());
+            buf.append('{');
+            boolean innerFirst = true;
+            for (Class<? extends Command> c : b.getValue()) {
+                if (!innerFirst) {
+                    buf.append(", ");
+                } else {
+                    innerFirst = false;
+                }
+                buf.append(c.getSimpleName());
+            }
+            buf.append('}');
+        }
+        buf.append(']');
+        return buf.toString();
+    }
 }
