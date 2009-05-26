@@ -10,6 +10,6 @@ public class CrappyDatacenterConnection
     }
 
     public AbstractDatacenter connect(String url, String username, char[] password) {
-        return new CrappyDatacenter();
+        return new CrappyDatacenter(new CrappyDatacenterId(url));
     }
 }

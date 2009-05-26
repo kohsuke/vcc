@@ -1,6 +1,7 @@
 package net.java.dev.vcc.spi;
 
 import net.java.dev.vcc.api.Computer;
+import net.java.dev.vcc.api.ManagedObjectId;
 
 /**
  * Created by IntelliJ IDEA.
@@ -9,5 +10,9 @@ import net.java.dev.vcc.api.Computer;
  * Time: 17:40:05
  * To change this template use File | Settings | File Templates.
  */
-public abstract class AbstractComputer implements Computer {
+public abstract class AbstractComputer extends AbstractManagedObject<Computer> implements Computer {
+
+    protected AbstractComputer(ManagedObjectId<Computer> id) {
+        super(id);
+    }
 }

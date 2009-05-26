@@ -1,15 +1,12 @@
 package net.java.dev.vcc.api;
 
 import net.java.dev.vcc.spi.DatacenterConnection;
-import net.java.dev.vcc.util.ServiceLoaderProxy;
 import net.java.dev.vcc.util.ServiceLoaderCache;
 
-import java.lang.ref.WeakReference;
+import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 /**
  * The connection factory creates connections with which to control Virtual Computers and their Hosts.
@@ -20,7 +17,7 @@ public final class DatacenterManager {
      * A weak cache of service loader proxies that should allow unloading without a permgen leak (I hope).
      * Guarded by itself.
      */
-    private static final ServiceLoaderCache<DatacenterConnection> cache = 
+    private static final ServiceLoaderCache<DatacenterConnection> cache =
             new ServiceLoaderCache<DatacenterConnection>(DatacenterConnection.class);
 
     /**
@@ -42,7 +39,7 @@ public final class DatacenterManager {
      * @return The connection.
      * @throws RuntimeException until we get our own exception for when we cannot get a connection.
      */
-    public static Datacenter getConnection(String url, String username, char[] password) {
+    public static Datacenter getConnection(String url, String username, char[] password) throws IOException {
         return getConnection(getContextClassLoader(), url, username, password);
     }
 
@@ -60,7 +57,7 @@ public final class DatacenterManager {
      * @return The connection.
      * @throws RuntimeException until we get our own exception for when we cannot get a connection.
      */
-    public static Datacenter getConnection(ClassLoader classLoader, String url, String username, char[] password) {
+    public static Datacenter getConnection(ClassLoader classLoader, String url, String username, char[] password) throws IOException {
         Iterator<DatacenterConnection> i = cache.get(classLoader).iterator();
         while (i.hasNext()) {
             DatacenterConnection manager = i.next();

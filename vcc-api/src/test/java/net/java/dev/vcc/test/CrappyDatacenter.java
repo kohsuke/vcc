@@ -1,9 +1,6 @@
 package net.java.dev.vcc.test;
 
-import net.java.dev.vcc.api.Command;
-import net.java.dev.vcc.api.Computer;
-import net.java.dev.vcc.api.Host;
-import net.java.dev.vcc.api.PowerState;
+import net.java.dev.vcc.api.*;
 import net.java.dev.vcc.spi.AbstractDatacenter;
 
 import java.util.Collections;
@@ -17,8 +14,14 @@ import java.util.concurrent.TimeoutException;
  * A useless datacenter.
  */
 public class CrappyDatacenter extends AbstractDatacenter {
+
+
     private final Object lock = new Object();
     private boolean open = true;
+
+    public CrappyDatacenter(CrappyDatacenterId crappyDatacenterId) {
+        super(crappyDatacenterId);
+    }
 
     public Set<Host> getHosts() {
         checkOpen();
@@ -56,6 +59,10 @@ public class CrappyDatacenter extends AbstractDatacenter {
         synchronized (lock) {
             if (!open) throw new IllegalStateException("Connection is already closed");
         }
+    }
+
+    public ManagedObjectId<Datacenter> getId() {
+        return null;
     }
 
     public Set<Class<? extends Command>> getCommands() {
