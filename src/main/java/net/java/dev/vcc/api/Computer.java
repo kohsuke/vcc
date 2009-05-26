@@ -6,7 +6,7 @@ import java.util.concurrent.Future;
 /**
  * Represents a Virtual Computer.
  */
-public interface Computer  extends ManagedObject {
+public interface Computer extends ManagedObject<Computer> {
 
     /**
      * Gets the host that this computer is currently attached to.

@@ -7,5 +7,5 @@ package net.java.dev.vcc.api;
  * Time: 17:32:54
  * To change this template use File | Settings | File Templates.
  */
-public interface ComputerTemplate  extends ManagedObject {
+public interface ComputerTemplate extends ManagedObject<ComputerTemplate> {
 }

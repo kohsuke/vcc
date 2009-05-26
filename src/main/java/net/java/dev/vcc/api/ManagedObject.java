@@ -5,7 +5,10 @@ import java.util.Set;
 /**
  * Represents an object in a {@link net.java.dev.vcc.api.Datacenter}
  */
-public interface ManagedObject {
+public interface ManagedObject<T extends ManagedObject> {
+
+    ManagedObjectId<T> getId();
+
     /**
      * Returns the types of {@link Command} that are supported on this Managed Object.
      *

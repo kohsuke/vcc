@@ -8,10 +8,12 @@ import org.hamcrest.core.IsNull;
 import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
+import java.io.IOException;
+
 public class SmokeTest {
 
     @Test
-    public void smokes() {
+    public void smokes() throws IOException {
         final Datacenter datacenter = DatacenterManager.getConnection("vcc:crappy:localhost", "", "".toCharArray());
         assertThat(datacenter, IsNull.notNullValue());
         assertThat(datacenter, Is.is(CrappyDatacenter.class));
