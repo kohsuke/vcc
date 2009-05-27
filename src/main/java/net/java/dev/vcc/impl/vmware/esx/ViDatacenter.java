@@ -9,13 +9,30 @@ import net.java.dev.vcc.api.profiles.BasicProfile;
 import net.java.dev.vcc.spi.AbstractDatacenter;
 import net.java.dev.vcc.util.CompletedFuture;
 
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A VMware ESX Datacenter.
  */
 public class ViDatacenter extends AbstractDatacenter {
+
+    private static final class ResourceHolder {
+        private static final Map<PowerState, Set<PowerState>> ALLOWED_TRANSITIONS;
+
+        static {
+            TreeMap<PowerState, Set<PowerState>> map = new TreeMap<PowerState, Set<PowerState>>();
+            map.put(PowerState.STOPPED, Collections.unmodifiableSet(new TreeSet<PowerState>(
+                    Arrays.asList(PowerState.RUNNING))
+            ));
+            map.put(PowerState.SUSPENDED, Collections.unmodifiableSet(new TreeSet<PowerState>(
+                    Arrays.asList(PowerState.STOPPED, PowerState.RUNNING))
+            ));
+            map.put(PowerState.RUNNING, Collections.unmodifiableSet(new TreeSet<PowerState>(
+                    Arrays.asList(PowerState.STOPPED, PowerState.SUSPENDED))
+            ));
+            ALLOWED_TRANSITIONS = Collections.unmodifiableMap(map);
+        }
+    }
 
     private final Object connectionLock = new Object();
     private ViConnection connection;
@@ -43,11 +60,15 @@ public class ViDatacenter extends AbstractDatacenter {
     }
 
     public Set<PowerState> getAllowedStates() {
-        return Collections.emptySet(); // TODO get commands
+        return ResourceHolder.ALLOWED_TRANSITIONS.keySet();
     }
 
     public Set<PowerState> getAllowedStates(PowerState from) {
-        return Collections.emptySet(); // TODO get commands
+        Set<PowerState> states = ResourceHolder.ALLOWED_TRANSITIONS.get(from);
+        if (states != null) {
+            return states;
+        }
+        return Collections.emptySet();
     }
 
     public void close() {
