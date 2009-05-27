@@ -1,7 +1,5 @@
 package net.java.dev.vcc.util;
 
-import net.java.dev.vcc.api.DatacenterManager;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +27,7 @@ class JDK5ServiceLoaderImpl<S>
      */
     @SuppressWarnings("unchecked")
     private static <T> T[] loadServices(Class<T> clazz, ClassLoader classLoader) {
-        final Logger LOGGER = Logger.getLogger(DatacenterManager.class.getName());
+        final Logger LOGGER = Logger.getLogger(JDK5ServiceLoaderImpl.class.getName());
 
         LOGGER.log(Level.FINEST, "loadServices({0},{1})", new Object[]{clazz, classLoader});
 
