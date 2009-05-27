@@ -2,8 +2,9 @@ package net.java.dev.vcc.util;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,28 +29,28 @@ public class ServiceLoaderProxy<S>
         return delegate.iterator();
     }
 
+    @SuppressWarnings("unchecked")
     public static <S> ServiceLoaderProxy<S> load(Class<S> service, ClassLoader loader) {
+        final Logger logger = Logger.getLogger(ServiceLoaderProxy.class.getName());
         try {
             final Constructor<? extends ServiceLoader> constructor =
                     AdapterProvider.provider.getConstructor(Class.class, ClassLoader.class);
             return new ServiceLoaderProxy<S>(constructor.newInstance(service, loader));
         }
         catch (NoSuchMethodException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
         }
         catch (InvocationTargetException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
         }
         catch (IllegalAccessException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
         }
         catch (InstantiationException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
         }
-        return new ServiceLoaderProxy<S>(new ServiceLoader<S>() {
-            public void reload() {
-            }
-
-            public Iterator<S> iterator() {
-                return Collections.<S>emptySet().iterator();
-            }
-        });
+        // just fall back to the one we know works...
+        return new ServiceLoaderProxy<S>(new JDK5ServiceLoaderImpl<S>(service, loader));
     }
 
     private static class AdapterProvider {
@@ -57,13 +58,19 @@ public class ServiceLoaderProxy<S>
 
         @SuppressWarnings("unchecked")
         private static Class<? extends ServiceLoader> findProvider() {
-            // first try JDK6
+            // first try JDK 6
             try {
-                Class.forName("java.util.ServiceLoader");
+                // see if
+                Class.forName("java.util.ServiceLoader", false, ClassLoader.getSystemClassLoader());
                 return (Class<? extends ServiceLoader>) ServiceLoaderProxy.class.getClassLoader().loadClass(
                         ServiceLoaderProxy.class.getPackage().getName() + ".JDK6ServiceLoaderImpl");
-            }
-            catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundException e) {
+                // expected if we are not on JDK 6
+                return JDK5ServiceLoaderImpl.class;
+            } catch (SecurityException e) {
+                // might also occur if we are not on JDK 6... system classloader may complain about trying to
+                // load a java.util class... seemingly even before it's checked to see if the class is in
+                // the system class loader... never mind that we are specifically asking the system class loader!
                 return JDK5ServiceLoaderImpl.class;
             }
         }
