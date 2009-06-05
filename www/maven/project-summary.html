@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+
+
+
+
+
+
+
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+    <title>Virtual Computer Control - Project Summary</title>
+    <style type="text/css" media="all">
+        @import url("./css/maven-base.css");
+        @import url("./css/maven-theme.css");
+        @import url("./css/site.css");
+    </style>
+    <link rel="stylesheet" href="./css/print.css" type="text/css" media="print"/>
+                    </head>
+<body class="composite">
+<!-- TODO: move this into JavaScript to patch the skin
+  <div class="xright">
+
+
+
+
+&nbsp;| Last Published: 2009-06-05
+&nbsp;| Version: 1.0.0-SNAPSHOT
+
+</div>
+-->
+<div id="leftColumn">
+    <div id="navcolumn">
+            </div>
+    <script>
+        // replace the java.net project tools with the navigation bar from Maven.
+        // also get rid of "Get Involved" thingie too, while we are at it
+        var pt = document.getElementById("projecttools");
+        var nv = document.getElementById("navcolumn");
+
+        while (pt.previousSibling != null)
+            pt.parentNode.removeChild(pt.previousSibling);
+
+        pt.parentNode.insertBefore(nv, pt);
+        pt.parentNode.removeChild(pt);
+    </script>
+    <script>
+        // kill "description" h3 bar
+        var ld = document.getElementById("longdescription");
+        if (ld != null) {
+            for (n = ld.firstChild; n != null; n = n.nextSibling) {
+                if (n.nodeType == 1 && n.innerHTML == "Description") {
+                    n.parentNode.removeChild(n);
+                    break;
+                }
+            }
+        }
+    </script>
+</div>
+<div id="bodyColumn">
+    <div id="contentBox">
+        <div class="section"><h2>Project Summary</h2>
+<div class="section"><h3>Project Information</h3>
+<table class="bodyTable"><tr class="a"><th>Field</th>
+<th>Value</th>
+</tr>
+<tr class="b"><td>Name</td>
+<td>Virtual Computer Control</td>
+</tr>
+<tr class="a"><td>Description</td>
+<td>A Java API for controlling virtual computers</td>
+</tr>
+<tr class="b"><td>Homepage</td>
+<td><a href="https://vcc.dev.java.net/" class="externalLink">https://vcc.dev.java.net/</a></td>
+</tr>
+</table>
+</div>
+<div class="section"><h3>Project Organization</h3>
+<p>This project does not belong to an organization.</p>
+</div>
+<div class="section"><h3>Build Information</h3>
+<table class="bodyTable"><tr class="a"><th>Field</th>
+<th>Value</th>
+</tr>
+<tr class="b"><td>GroupId</td>
+<td>net.java.dev.vcc</td>
+</tr>
+<tr class="a"><td>ArtifactId</td>
+<td>vcc-site</td>
+</tr>
+<tr class="b"><td>Version</td>
+<td>1.0.0-SNAPSHOT</td>
+</tr>
+<tr class="a"><td>Type</td>
+<td>pom</td>
+</tr>
+</table>
+</div>
+</div>
+
+    </div>
+</div>
+<div class="clear">
+    <hr/>
+</div>
+<div id="footer">
+    <div class="xright">Copyright &#169;
+
+2009.
+
+All Rights
+        Reserved.
+
+
+
+
+&nbsp;| Last Published: 2009-06-05
+&nbsp;| Version: 1.0.0-SNAPSHOT
+
+</div>
+    <div class="clear">
+        <hr/>
+    </div>
+</div>
+</body>
+</html>
