@@ -16,22 +16,22 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.java.dev.vcc</groupId>
-    <artifactId>vcc-parent</artifactId>
+    <artifactId>vcc-maven-skin</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
 
-    <name>Virtual Computer Control Parent Project</name>
+    <name>Virtual Computer Control Maven Skin</name>
     <url>https://vcc.dev.java.net/vcc-parent</url>
 
+    <description>Maven Site Skin for the Virtual Computer Control maven project sites</description>
+
     <scm>
-        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-parent/</connection>
-        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-parent/
+        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-maven-skin/</connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-maven-skin/
         </developerConnection>
-        <url>https://vcc.dev.java.net/source/browse/vcc/trunk/vcc-parent</url>
+        <url>https://vcc.dev.java.net/source/browse/vcc/trunk/vcc-maven-skin/</url>
     </scm>
 
     <mailingLists>
@@ -74,33 +74,9 @@
         </license>
     </licenses>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.4</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
     </properties>
-
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <configuration>
-                        <source>1.5</source>
-                        <target>1.5</target>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
 
 </project>

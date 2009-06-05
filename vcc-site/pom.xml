@@ -14,7 +14,8 @@
   limitations under the License.
 
 -->
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -27,13 +28,26 @@
     <artifactId>vcc-site</artifactId>
     <packaging>pom</packaging>
 
-    <name>Virtual Computer Control Site</name>
+    <name>Virtual Computer Control</name>
     <url>https://vcc.dev.java.net/</url>
+
+    <description>A Java API for controlling virtual computers</description>
 
     <scm>
         <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-site/</connection>
         <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-site/</developerConnection>
         <url>https://vcc.dev.java.net/source/browse/vcc/trunk/vcc-site/</url>
     </scm>
+
+    <distributionManagement>
+        <site>
+            <id>java.net</id>
+            <url>${altSiteRepository}</url>
+        </site>
+    </distributionManagement>
+
+    <properties>
+        <altSiteRepository>dav:https://svn.dev.java.net/svn/vcc/trunk/www/vcc-parent/</altSiteRepository>
+    </properties>
 
 </project>
