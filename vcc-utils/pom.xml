@@ -24,28 +24,20 @@
         <relativePath>../vcc-parent/</relativePath>
     </parent>
 
-    <artifactId>vcc-msvm-impl</artifactId>
+    <artifactId>vcc-utils</artifactId>
     <packaging>jar</packaging>
 
-    <name>Virtual Computer Control Microsoft VM implementation</name>
-    <url>https://vcc.dev.java.net/vcc-msvm-impl</url>
+    <name>Virtual Computer Control Common Utility Classes</name>
+    <url>https://vcc.dev.java.net/vcc-utils</url>
 
-    <description>The Microsoft VM implementation of vcc-api</description>
+    <description>Common Utility classes used by implementations of vcc-api</description>
 
     <scm>
-        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-msvm-impl/</connection>
-        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-msvm-impl/
+        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-utils/</connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-utils/
         </developerConnection>
-        <url>https://vcc.dev.java.net/source/browse/vcc/trunk/vcc-msvm-impl/
+        <url>https://vcc.dev.java.net/source/browse/vcc/trunk/vcc-utils/
         </url>
     </scm>
-
-    <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>vcc-api</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-    </dependencies>
 
 </project>

@@ -18,26 +18,26 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>net.java.dev.virtual-computer-control</groupId>
+        <groupId>net.java.dev.vcc</groupId>
         <artifactId>vcc-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../vcc-parent/</relativePath>
     </parent>
 
-    <groupId>net.java.dev.virtual-computer-control.thirdparty</groupId>
+    <groupId>net.java.dev.vcc.thirdparty</groupId>
     <artifactId>thirdparty</artifactId>
     <packaging>pom</packaging>
 
     <name>Third party components</name>
-    <url>https://virtual-computer-control.dev.java.net/</url>
+    <url>https://vcc.dev.java.net/thirdparty</url>
 
     <description>Third party components used for control of virtual computers running on a virtual computer host</description>
 
     <scm>
-        <connection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/thirdparty/</connection>
-        <developerConnection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/thirdparty/
+        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/thirdparty/</connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/thirdparty/
         </developerConnection>
-        <url>https://virtual-computer-control.dev.java.net/source/browse/virtual-computer-control/trunk/thirdparty/</url>
+        <url>https://vcc.dev.java.net/source/browse/vcc/trunk/thirdparty/</url>
     </scm>
 
     <modules>

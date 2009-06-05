@@ -18,7 +18,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>net.java.dev.virtual-computer-control</groupId>
+        <groupId>net.java.dev.vcc</groupId>
         <artifactId>vcc-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>vcc-parent/</relativePath>
@@ -28,24 +28,26 @@
     <packaging>pom</packaging>
 
     <name>Virtual Computer Control Aggregator Project</name>
-    <url>https://virtual-computer-control.dev.java.net/</url>
+    <url>https://vcc.dev.java.net/</url>
 
     <modules>
         <module>vcc-parent</module>
         <module>thirdparty</module>
         <module>vcc-api</module>
+        <module>vcc-utils</module>
         <module>vcc-xen-impl</module>
         <module>vcc-xvm-impl</module>
         <module>vcc-msvm-impl</module>
         <module>vcc-vmware-vix-impl</module>
         <module>vcc-vmware-esx-impl</module>
+        <module>vcc-libvirt-impl</module>
         <module>vcc-site</module>
     </modules>
 
     <scm>
-        <connection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/</connection>
-        <developerConnection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/</developerConnection>
-        <url>https://virtual-computer-control.dev.java.net/source/browse/virtual-computer-control/trunk/</url>
+        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/</connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/</developerConnection>
+        <url>https://vcc.dev.java.net/source/browse/vcc/trunk/</url>
     </scm>
 
     <build>

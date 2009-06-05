@@ -24,19 +24,21 @@
         <relativePath>../vcc-parent/</relativePath>
     </parent>
 
-    <artifactId>vcc-msvm-impl</artifactId>
+    <artifactId>vcc-libvirt-impl</artifactId>
     <packaging>jar</packaging>
 
-    <name>Virtual Computer Control Microsoft VM implementation</name>
-    <url>https://vcc.dev.java.net/vcc-msvm-impl</url>
+    <name>Virtual Computer Control libvirt implementation</name>
+    <url>https://vcc.dev.java.net/vcc-libvirt-impl</url>
 
-    <description>The Microsoft VM implementation of vcc-api</description>
+    <description>The libvirt implementation of vcc-api</description>
 
     <scm>
-        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-msvm-impl/</connection>
-        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-msvm-impl/
+        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-libvirt-impl/
+        </connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-libvirt-impl/
         </developerConnection>
-        <url>https://vcc.dev.java.net/source/browse/vcc/trunk/vcc-msvm-impl/
+        <url>
+            https://vcc.dev.java.net/source/browse/vcc/trunk/vcc-vmware-esx-impl/
         </url>
     </scm>
 
@@ -45,6 +47,11 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>vcc-api</artifactId>
             <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

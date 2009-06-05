@@ -18,7 +18,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>net.java.dev.virtual-computer-control</groupId>
+        <groupId>net.java.dev.vcc</groupId>
         <artifactId>vcc-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../vcc-parent/</relativePath>
@@ -28,12 +28,12 @@
     <packaging>pom</packaging>
 
     <name>Virtual Computer Control Site</name>
-    <url>https://virtual-computer-control.dev.java.net/</url>
+    <url>https://vcc.dev.java.net/</url>
 
     <scm>
-        <connection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/vcc-site/</connection>
-        <developerConnection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/vcc-site/</developerConnection>
-        <url>https://virtual-computer-control.dev.java.net/source/browse/virtual-computer-control/trunk/vcc-site/</url>
+        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-site/</connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-site/</developerConnection>
+        <url>https://vcc.dev.java.net/source/browse/vcc/trunk/vcc-site/</url>
     </scm>
 
 </project>
