@@ -18,7 +18,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>net.java.dev.virtual-computer-control</groupId>
+        <groupId>net.java.dev.vcc</groupId>
         <artifactId>vcc-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../vcc-parent/</relativePath>
@@ -28,15 +28,15 @@
     <packaging>jar</packaging>
 
     <name>Virtual Computer Control API</name>
-    <url>https://virtual-computer-control.dev.java.net/</url>
+    <url>https://vcc.dev.java.net/vcc-api</url>
 
     <description>The API for control of virtual computers running on a virtual computer host</description>
 
     <scm>
-        <connection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/vcc-api/</connection>
-        <developerConnection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/vcc-api/
+        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-api/</connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-api/
         </developerConnection>
-        <url>https://virtual-computer-control.dev.java.net/source/browse/virtual-computer-control/trunk/vcc-api/</url>
+        <url>https://vcc.dev.java.net/source/browse/vcc/trunk/vcc-api/</url>
     </scm>
 
     <dependencies>
