@@ -16,7 +16,8 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 -->
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.java.dev.vcc.thirdparty</groupId>
@@ -50,8 +51,11 @@
 
     <scm>
         <connection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/thirdparty/xen-api/</connection>
-        <developerConnection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/thirdparty/xen-api/</developerConnection>
-        <url>https://virtual-computer-control.dev.java.net/source/browse/virtual-computer-control/trunk/thirdparty/xen-api/</url>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/thirdparty/xen-api/
+        </developerConnection>
+        <url>
+            https://virtual-computer-control.dev.java.net/source/browse/virtual-computer-control/trunk/thirdparty/xen-api/
+        </url>
     </scm>
 
     <mailingLists>
@@ -73,7 +77,7 @@
         <system>a forum</system>
         <url>http://forums.citrix.com/forum.jspa?forumID=175&amp;start=0</url>
     </issueManagement>
- 
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -83,12 +87,12 @@
             <groupId>org.apache.xmlrpc</groupId>
             <artifactId>xmlrpc-client</artifactId>
             <version>3.1</version>
-        </dependency> 
+        </dependency>
         <dependency>
             <groupId>org.apache.xmlrpc</groupId>
             <artifactId>xmlrpc-common</artifactId>
             <version>3.1</version>
-        </dependency> 
+        </dependency>
         <dependency>
             <groupId>org.apache.ws.commons.util</groupId>
             <artifactId>ws-commons-util</artifactId>
