@@ -19,7 +19,7 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>net.java.dev.virtual-computer-control.thirdparty</groupId>
+    <groupId>net.java.dev.vcc.thirdparty</groupId>
     <artifactId>xen-api</artifactId>
     <version>5.0.0-3-SNAPSHOT</version>
     <packaging>jar</packaging>
