@@ -47,7 +47,7 @@
     </distributionManagement>
 
     <properties>
-        <altSiteRepository>dav:https://svn.dev.java.net/svn/vcc/trunk/www/vcc-parent/</altSiteRepository>
+        <altSiteRepository>dav:https://svn.dev.java.net/svn/vcc/trunk/www/maven/</altSiteRepository>
     </properties>
 
 </project>
