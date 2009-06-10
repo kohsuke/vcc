@@ -50,26 +50,23 @@
     </licenses>
 
     <scm>
-        <connection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/thirdparty/xen-api/</connection>
-        <developerConnection>scm:svn:https://svn.dev.java.net/svn/virtual-computer-control/trunk/thirdparty/xen-api/
-        </developerConnection>
-        <url>
-            https://virtual-computer-control.dev.java.net/source/browse/virtual-computer-control/trunk/thirdparty/xen-api/
-        </url>
+        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/thirdparty/xen-api/</connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/thirdparty/xen-api/</developerConnection>
+        <url>https://vcc.dev.java.net/source/browse/vcc/trunk/thirdparty/xen-api/</url>
     </scm>
 
     <mailingLists>
         <mailingList>
             <name>Development List</name>
-            <subscribe>dev-subscribe@virtual-computer-control.dev.java.net</subscribe>
-            <unsubscribe>dev-unsubscribe@virtual-computer-control.dev.java.net</unsubscribe>
-            <post>dev@virtual-computer-control.dev.java.net</post>
+            <subscribe>dev-subscribe@vcc.dev.java.net</subscribe>
+            <unsubscribe>dev-unsubscribe@vcc.dev.java.net</unsubscribe>
+            <post>dev@vcc.dev.java.net</post>
             <archive>http://n2.nabble.com/Java-Virtual-Computer-Control-API-Developers-List-f2130245.html</archive>
         </mailingList>
         <mailingList>
             <name>Commits List</name>
-            <subscribe>commits-subscribe@virtual-computer-control.dev.java.net</subscribe>
-            <unsubscribe>commits-unsubscribe@virtual-computer-control.dev.java.net</unsubscribe>
+            <subscribe>commits-subscribe@vcc.dev.java.net</subscribe>
+            <unsubscribe>commits-unsubscribe@vcc.dev.java.net</unsubscribe>
         </mailingList>
     </mailingLists>
 
