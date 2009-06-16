@@ -21,7 +21,7 @@
     <parent>
         <groupId>net.java.dev.vcc</groupId>
         <artifactId>vcc-parent</artifactId>
-        <version>0.0.1</version>
+        <version>0.0.2</version>
         <relativePath>../vcc-parent/</relativePath>
     </parent>
 
