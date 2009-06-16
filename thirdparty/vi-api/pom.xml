@@ -21,7 +21,7 @@
     <parent>
         <groupId>net.java.dev.vcc.thirdparty</groupId>
         <artifactId>thirdparty</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>vi-api</artifactId>
     <version>4.0.0-1-SNAPSHOT</version>
