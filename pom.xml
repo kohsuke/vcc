@@ -137,6 +137,13 @@
                         <target>1.5</target>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <configuration>
+                        <maxmemory>512m</maxmemory>
+                        <author>false</author>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
