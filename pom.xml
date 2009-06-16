@@ -21,7 +21,7 @@
 
     <groupId>net.java.dev.vcc</groupId>
     <artifactId>vcc-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Virtual Computer Control Parent Project</name>
