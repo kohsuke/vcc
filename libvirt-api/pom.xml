@@ -21,7 +21,7 @@
     <parent>
         <groupId>net.java.dev.vcc.thirdparty</groupId>
         <artifactId>thirdparty</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.1</version>
     </parent>
     <artifactId>libvirt-api</artifactId>
     <packaging>jar</packaging>
