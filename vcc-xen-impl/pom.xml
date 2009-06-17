@@ -23,8 +23,7 @@
     <parent>
         <groupId>net.java.dev.vcc</groupId>
         <artifactId>vcc-parent</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../vcc-parent/</relativePath>
+        <version>0.0.2</version>
     </parent>
 
     <artifactId>vcc-xen-impl</artifactId>
@@ -60,7 +59,7 @@
         <dependency>
             <groupId>net.java.dev.vcc.thirdparty</groupId>
             <artifactId>xen-api</artifactId>
-            <version>5.0.0-3-SNAPSHOT</version>
+            <version>5.0.0-4</version>
         </dependency>
     </dependencies>
 
