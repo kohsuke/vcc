@@ -170,6 +170,9 @@
                         <goals>
                             <goal>sign</goal>
                         </goals>
+                        <configuration>
+                            <keyname>announce@vcc.dev.java.net</keyname>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
