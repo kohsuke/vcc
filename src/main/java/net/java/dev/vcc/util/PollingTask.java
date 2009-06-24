@@ -5,24 +5,49 @@ import java.util.concurrent.TimeUnit;
 /**
  * A task that will repeatedly poll.
  */
-public abstract class BackgroundPollingTask
+public abstract class PollingTask
     implements Runnable
 {
+    /**
+     * The task we want to repeatedly execute.
+     */
     private final Runnable pollTask;
 
+    /**
+     * A lock for our polling task statistics.
+     */
     private final Object averageLock = new Object();
 
-    private double fastAverage = 1;
+    /**
+     * Recent average of the polling task duration in seconds.
+     */
+    private double fastAverage = 1.0;
 
-    private double slowAverage = 1;
+    /**
+     * Long term average of the polling task duration in seconds.
+     */
+    private double slowAverage = 1.0;
 
+    /**
+     * The decay rate for the "fast" average.
+     */
     private static final double FAST_RATE = 0.1;
 
+    /**
+     * The decay rate for the "slow" average.
+     */
     private static final double SLOW_RATE = 0.001;
-    
-    private static final double TO_SECONDS = 1.0 / TimeUnit.SECONDS.toNanos( 1 );
 
-    public BackgroundPollingTask( Runnable pollTask )
+    /**
+     * The length of a nanosecond in seconds.
+     */
+    protected static final double TO_SECONDS = 1.0 / TimeUnit.SECONDS.toNanos( 1 );
+
+    /**
+     * Creates a new {@link PollingTask}
+     * @param pollTask the task to run.
+     */
+    protected PollingTask( Runnable pollTask )
     {
         this.pollTask = pollTask;
     }
@@ -83,5 +108,9 @@ public abstract class BackgroundPollingTask
         synchronized ( averageLock ) {
             return slowAverage;
         }
+    }
+    
+    public boolean isRunning() {
+        return true;
     }
 }
