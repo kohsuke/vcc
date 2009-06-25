@@ -16,7 +16,6 @@
 -->
 <project>
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>net.java.dev.vcc</groupId>
         <artifactId>vcc-parent</artifactId>
@@ -38,5 +37,13 @@
         <url>https://vcc.dev.java.net/source/browse/vcc/trunk/vcc-utils/
         </url>
     </scm>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.5</version>
+        </dependency>
+    </dependencies>
 
 </project>
