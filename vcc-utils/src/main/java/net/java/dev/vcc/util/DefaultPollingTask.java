@@ -3,42 +3,37 @@ package net.java.dev.vcc.util;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by IntelliJ IDEA.
- * User: user
- * Date: 24-Jun-2009
- * Time: 19:08:22
- * To change this template use File | Settings | File Templates.
+ * A default {@link net.java.dev.vcc.util.PollingTask} implementation that tries to run the
+ * task at (on average) a steady interval.
  */
 public class DefaultPollingTask
-    extends PollingTask
-{
-    private final double frequency;
+        extends PollingTask {
+    private final double interval;
 
     /**
      * Creates a new {@link PollingTask}
      *
-     * @param pollTask  the task to run.
-     * @param frequency
+     * @param pollTask the task to run.
+     * @param interval
      */
-    protected DefaultPollingTask( Runnable pollTask, long frequency, TimeUnit frequencyUnit )
-    {
-        super( pollTask );
-        this.frequency = frequencyUnit.toNanos( frequency ) * TO_SECONDS;
+    protected DefaultPollingTask(TaskController controller, Runnable pollTask, long interval, TimeUnit intervalUnit) {
+        super(controller, pollTask);
+        this.interval = intervalUnit.toNanos(interval) * TO_SECONDS;
     }
 
-    /** {@inheritDoc} */
-    public void run()
-    {
-        while ( isRunning() ) {
-            poll();
-            try
-            {
-                // sleep for the frequency less the average poll duration
-                // so that on average polls will complete with the desired frequency
-                TimeUnit.NANOSECONDS.sleep( (long) (Math.max( frequency - getSlowAverage(), 0 ) / TO_SECONDS));
+    /**
+     * {@inheritDoc}
+     */
+    public void run() {
+        while (getController().isActive()) {
+            double last = poll();
+            try {
+                // sleep for the interval less the average poll duration
+                // so that on average polls will complete with the desired interval
+                TimeUnit.NANOSECONDS.sleep((long) (Math.max(interval
+                        - Math.min(Math.max(getSlowAverage(), getFastAverage()), last), 0) / TO_SECONDS));
             }
-            catch ( InterruptedException e )
-            {
+            catch (InterruptedException e) {
                 // ignore
             }
         }
