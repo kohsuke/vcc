@@ -49,9 +49,14 @@
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>vcc-utils</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
             <groupId>net.java.dev.vcc.thirdparty</groupId>
             <artifactId>vi-api</artifactId>
-            <version>4.0.0-1</version>
+            <version>4.0.0-2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
