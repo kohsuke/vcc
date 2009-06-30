@@ -14,7 +14,7 @@ import java.util.Arrays;
  * Created by IntelliJ IDEA. User: connollys Date: Jun 30, 2009 Time: 12:38:05 PM To change this template use File |
  * Settings | File Templates.
  */
-public class Helper {
+public final class Helper {
     private Helper() throws IllegalAccessException {
         throw new IllegalAccessException("Utility class");
     }
