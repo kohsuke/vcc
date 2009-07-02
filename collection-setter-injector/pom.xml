@@ -8,7 +8,15 @@
   </parent>
 
   <artifactId>collection-setter-injector</artifactId>
-  <version>0.5.0-0</version>
+  <version>0.5.0-1-SNAPSHOT</version>
+
+    <licenses>
+        <license>
+            <name>COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0</name>
+            <url>file://${basedir}/LICENSE.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
   <build>
     <plugins>
@@ -30,10 +38,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <scm>
-    <connection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/collection-setter-injector-0.5.0-0</connection>
-    <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/collection-setter-injector-0.5.0-0</developerConnection>
-    <url>https://vcc.dev.java.net/source/browse/vcc/tags/collection-setter-injector-0.5.0-0</url>
-  </scm>
 </project>
