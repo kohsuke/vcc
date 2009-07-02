@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>net.java.dev.vcc.thirdparty</groupId>
+    <artifactId>thirdparty</artifactId>
+    <version>0.0.2</version>
+  </parent>
+
+  <artifactId>collection-setter-injector</artifactId>
+  <version>0.5.0-0-SNAPSHOT</version>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+        <configuration>
+          <tasks>
+            <copy file="${basedir}/src/main/jar/collection-setter-injector.jar"
+                  tofile="${project.build.directory}/${project.build.finalName}.jar"
+                  overwrite="true"/>
+          </tasks>
+        </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
