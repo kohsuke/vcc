@@ -43,12 +43,12 @@
     </scm>
 
     <modules>
-        <module>xen-api</module>
+        <!--module>xen-api</module-->
         <module>vi-api</module>
-        <module>libvirt-api</module>
+        <!--module>libvirt-api</module>
         <module>libvirt-local-client</module>
         <module>libvirt-proxy-client</module>
-        <module>libvirt-proxy-server</module>
+        <module>libvirt-proxy-server</module-->
     </modules>
 
 </project>
