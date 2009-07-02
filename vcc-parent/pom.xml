@@ -20,17 +20,17 @@
 
     <groupId>net.java.dev.vcc</groupId>
     <artifactId>vcc-parent</artifactId>
-    <version>0.0.4-SNAPSHOT</version>
+    <version>0.0.4</version>
     <packaging>pom</packaging>
 
     <name>Virtual Computer Control Parent Project</name>
     <url>https://vcc.dev.java.net/vcc-parent</url>
 
     <scm>
-        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-parent/</connection>
-        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-parent/
+        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/vcc-parent-0.0.4</connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/vcc-parent-0.0.4
         </developerConnection>
-        <url>https://vcc.dev.java.net/source/browse/vcc/trunk/vcc-parent</url>
+        <url>https://vcc.dev.java.net/source/browse/vcc/tags/vcc-parent-0.0.4</url>
     </scm>
 
     <mailingLists>
