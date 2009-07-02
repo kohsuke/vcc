@@ -55,7 +55,7 @@
                 <artifactId>jaxws-maven-plugin</artifactId>
                 <version>1.10</version>
                 <configuration>
-                    <target>2.0</target>
+                    <target>2.1</target>
                     <xnocompile>true</xnocompile>
                     <wsdlDirectory>${basedir}/src/main/wsdl</wsdlDirectory>
                     <xjcArgs><xjcArg>-Xcollection-setter-injector</xjcArg></xjcArgs>
