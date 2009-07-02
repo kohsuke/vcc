@@ -20,13 +20,13 @@
     <parent>
         <groupId>net.java.dev.vcc</groupId>
         <artifactId>vcc-parent</artifactId>
-        <version>0.0.3</version>
+        <version>0.0.4</version>
         <relativePath>../vcc-parent/</relativePath>
     </parent>
 
     <groupId>net.java.dev.vcc.thirdparty</groupId>
     <artifactId>thirdparty</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.3</version>
     <packaging>pom</packaging>
 
     <name>Third party components</name>
@@ -36,19 +36,19 @@
     </description>
 
     <scm>
-        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/thirdparty/</connection>
-        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/thirdparty/
+        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/thirdparty-0.0.3</connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/thirdparty-0.0.3
         </developerConnection>
-        <url>https://vcc.dev.java.net/source/browse/vcc/trunk/thirdparty/</url>
+        <url>https://vcc.dev.java.net/source/browse/vcc/tags/thirdparty-0.0.3</url>
     </scm>
 
     <modules>
-        <module>xen-api</module>
+        <!--module>xen-api</module-->
         <module>vi-api</module>
-        <module>libvirt-api</module>
+        <!--module>libvirt-api</module>
         <module>libvirt-local-client</module>
         <module>libvirt-proxy-client</module>
-        <module>libvirt-proxy-server</module>
+        <module>libvirt-proxy-server</module-->
     </modules>
 
 </project>
