@@ -58,6 +58,7 @@
                     <target>2.0</target>
                     <xnocompile>true</xnocompile>
                     <wsdlDirectory>${basedir}/src/main/wsdl</wsdlDirectory>
+                    <xjcArgs><xjcArg>-Xcollection-setter-injector</xjcArg></xjcArgs>
                 </configuration>
                 <executions>
                     <execution>
@@ -94,6 +95,11 @@
                         <groupId>com.sun.xml.ws</groupId>
                         <artifactId>jaxws-tools</artifactId>
                         <version>${jaxws-version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>net.java.dev.vcc.thirdparty</groupId>
+                        <artifactId>collection-setter-injector</artifactId>
+                        <version>0.5.0-1</version>
                     </dependency>
                 </dependencies>
             </plugin>
