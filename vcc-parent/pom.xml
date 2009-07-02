@@ -151,7 +151,7 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <configuration>
                     <!-- enable release profile during the release and GPG. -->
-                    <prepareVerifyArgs>-P release,sign</prepareVerifyArgs>
+                    <releaseProfiles>vcc-release</releaseProfiles>
                 </configuration>
             </plugin>
         </plugins>
@@ -160,7 +160,7 @@
     <profiles>
         <profile>
             <!-- sign binaries -->
-            <id>sign</id>
+            <id>vcc-release</id>
             <build>
                 <plugins>
                     <plugin>
