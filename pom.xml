@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>net.java.dev.vcc.thirdparty</groupId>
@@ -9,7 +8,7 @@
   </parent>
 
   <artifactId>collection-setter-injector</artifactId>
-  <version>0.5.0-0-SNAPSHOT</version>
+  <version>0.5.0-0</version>
 
   <build>
     <plugins>
@@ -23,9 +22,7 @@
             </goals>
         <configuration>
           <tasks>
-            <copy file="${basedir}/src/main/jar/collection-setter-injector.jar"
-                  tofile="${project.build.directory}/${project.build.finalName}.jar"
-                  overwrite="true"/>
+            <copy file="${basedir}/src/main/jar/collection-setter-injector.jar" tofile="${project.build.directory}/${project.build.finalName}.jar" overwrite="true" />
           </tasks>
         </configuration>
           </execution>
@@ -33,4 +30,10 @@
       </plugin>
     </plugins>
   </build>
+
+  <scm>
+    <connection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/collection-setter-injector-0.5.0-0</connection>
+    <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/collection-setter-injector-0.5.0-0</developerConnection>
+    <url>https://vcc.dev.java.net/source/browse/vcc/tags/collection-setter-injector-0.5.0-0</url>
+  </scm>
 </project>
