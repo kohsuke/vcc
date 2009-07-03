@@ -1,28 +1,34 @@
 package net.java.dev.vcc.impl.vmware.esx.vim25;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
-import javax.net.ssl.*;
 
+import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.VimPortType;
 import com.vmware.vim25.VimService;
-import com.vmware.vim25.ManagedObjectReference;
 
 public class ConnectionManager {
 
     private static final Logger LOGGER = Logger.getLogger(ConnectionManager.class.getName());
 
     public static VimPortType getConnection(String url) throws MalformedURLException {
-        final VimPortType proxy = new VimService(VimService.class.getResource("vimService.wsdl"), 
+        final VimPortType proxy = new VimService(VimService.class.getResource("vimService.wsdl"),
                 new QName("urn:vim25Service", "VimService")
         ).getVimPort();
         final BindingProvider bindingProvider = (BindingProvider) proxy;
-        bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
-                url.endsWith("/") ? url + "vimService/" : url + "/vimService/");
+        if (url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
+        }
+        bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, url);
         bindingProvider.getRequestContext().put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
 
         // Install the all-trusting trust manager
@@ -45,8 +51,10 @@ public class ConnectionManager {
                     }
             }, new java.security.SecureRandom());
             SSLSocketFactory sslSocketFactory = sc.getSocketFactory();
-            bindingProvider.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory", sslSocketFactory);
-            bindingProvider.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory", sslSocketFactory);
+            bindingProvider.getRequestContext()
+                    .put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory", sslSocketFactory);
+            bindingProvider.getRequestContext()
+                    .put("com.sun.xml.ws.transport.https.client.SSLSocketFactory", sslSocketFactory);
 //            bindingProvider.getRequestContext().put(com.sun.xml.internal.ws.developer.JAXWSProperties.SSL_SOCKET_FACTORY, sslSocketFactory);
 //            bindingProvider.getRequestContext().put(com.sun.xml.ws.developer.JAXWSProperties.SSL_SOCKET_FACTORY, sslSocketFactory);
         } catch (Exception e) {
@@ -62,7 +70,8 @@ public class ConnectionManager {
             }
         };
 
-        bindingProvider.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.hostname.verifier", verifier);
+        bindingProvider.getRequestContext()
+                .put("com.sun.xml.internal.ws.transport.https.client.hostname.verifier", verifier);
         bindingProvider.getRequestContext().put("com.sun.xml.ws.transport.https.client.hostname.verifier", verifier);
 //        bindingProvider.getRequestContext().put(com.sun.xml.internal.ws.developer.JAXWSProperties.HOSTNAME_VERIFIER, verifier);
 //        bindingProvider.getRequestContext().put(com.sun.xml.ws.developer.JAXWSProperties.HOSTNAME_VERIFIER, verifier);
