@@ -17,7 +17,9 @@ public class ConnectionManager {
     private static final Logger LOGGER = Logger.getLogger(ConnectionManager.class.getName());
 
     public static VimPortType getConnection(String url) throws MalformedURLException {
-        final VimPortType proxy = new VimService().getVimPort();
+        final VimPortType proxy = new VimService(VimService.class.getResource("vimService.wsdl"), 
+                new QName("urn:vim25Service", "VimService")
+        ).getVimPort();
         final BindingProvider bindingProvider = (BindingProvider) proxy;
         bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
                 url.endsWith("/") ? url + "vimService/" : url + "/vimService/");
