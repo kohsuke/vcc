@@ -20,7 +20,7 @@
     <parent>
         <groupId>net.java.dev.vcc.thirdparty</groupId>
         <artifactId>thirdparty</artifactId>
-        <version>0.0.3-SNAPSHOT</version>
+        <version>0.0.4-SNAPSHOT</version>
     </parent>
     <artifactId>libvirt-local-client</artifactId>
     <packaging>jar</packaging>
