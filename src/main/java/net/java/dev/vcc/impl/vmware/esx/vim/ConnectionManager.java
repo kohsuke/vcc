@@ -21,9 +21,13 @@ public class ConnectionManager {
                 new QName("urn:vim2Service", "VimService")
         ).getVimPort();
         final BindingProvider bindingProvider = (BindingProvider) proxy;
+        if (url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
+        }
         bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
-                url.endsWith("/") ? url + "vimService/" : url + "/vimService/");
-        bindingProvider.getRequestContext().put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
+                url);//.endsWith("/") ? url + "vimService/" : url + "/vimService/");
+        bindingProvider.getRequestContext().put(BindingProvider.SESSION_MAINTAIN_PROPERTY, false);
+        System.setProperty("http.keepAlive", "false");
 
         // Install the all-trusting trust manager
         // VMware ESX servers typically have a self-signed cert with the correct hostname
