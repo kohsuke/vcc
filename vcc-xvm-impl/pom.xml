@@ -21,10 +21,12 @@
     <parent>
         <groupId>net.java.dev.vcc</groupId>
         <artifactId>vcc-parent</artifactId>
-        <version>0.0.3</version>
+        <version>0.0.4</version>
+
     </parent>
 
     <artifactId>vcc-xvm-impl</artifactId>
+    <version>0.0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Virtual Computer Control xVM implementation</name>
@@ -42,9 +44,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>net.java.dev.vcc</groupId>
             <artifactId>vcc-api</artifactId>
-            <version>${project.parent.version}</version>
+            <version>0.0.3-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

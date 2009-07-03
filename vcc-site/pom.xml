@@ -21,10 +21,12 @@
     <parent>
         <groupId>net.java.dev.vcc</groupId>
         <artifactId>vcc-parent</artifactId>
-        <version>0.0.3</version>
+        <version>0.0.4</version>
+
     </parent>
 
     <artifactId>vcc-site</artifactId>
+    <version>0.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Virtual Computer Control</name>
