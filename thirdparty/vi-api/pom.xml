@@ -113,10 +113,12 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <replace file="${project.build.directory}/jaxws/wsimport/java/com/vmware/vim/VimService.java"
-                                         token='.class.getResource(".");' value='.class.getResource("");'/>
-                                <replace file="${project.build.directory}/jaxws/wsimport/java/com/vmware/vim25/VimService.java"
-                                         token='.class.getResource(".");' value='.class.getResource("");'/>
+                                <replace dir="${project.build.directory}/jaxws/wsimport/java"
+                                         summary="true">
+                                    <include name="**/*.java"/>
+                                    <replacetoken>.class.getResource(".");</replacetoken>
+                                    <replacevalue>.class.getResource("");</replacevalue>
+                                </replace>
                             </tasks>
                         </configuration>
                     </execution>
