@@ -58,7 +58,7 @@
         <dependency>
             <groupId>net.java.dev.vcc.thirdparty</groupId>
             <artifactId>vi-api</artifactId>
-            <version>4.0.0-3</version>
+            <version>4.0.0-4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
