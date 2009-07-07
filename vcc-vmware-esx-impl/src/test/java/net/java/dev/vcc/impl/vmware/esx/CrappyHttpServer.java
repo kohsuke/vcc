@@ -3,13 +3,15 @@ package net.java.dev.vcc.impl.vmware.esx;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A very basic HTTP server that just captures any requests and sends a pre-canned response
@@ -27,6 +29,11 @@ public class CrappyHttpServer implements Runnable {
     private byte[] lastRequest = null;
 
     private Properties lastHeaders = null;
+
+    private Map<String, Response> responses = new HashMap<String, Response>();
+
+    private static final Response DEFAULT_RESPONSE = new Response("application/soap+xml; charset=utf-8", createDefaultResponseContent());
+
 
     public boolean isRequestAvailable() {
         lock.lock();
@@ -86,22 +93,30 @@ public class CrappyHttpServer implements Runnable {
         return socket.getLocalPort();
     }
 
+    public void addResponse(String httpMethod, String path, String contentType, byte[] content) {
+        responses.put(httpMethod + " " + path, new Response(contentType, content));
+    }
+
     public void run() {
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "Listening for incomming connections on {0}",
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "Listening for incoming connections on {0}",
                 socket.getLocalSocketAddress());
         try {
             socket.setSoTimeout(100);
             while (!stop) {
                 try {
                     Socket client = socket.accept();
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, "Incomming connection from {0}",
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "Incoming connection from {0}",
                             client.getRemoteSocketAddress());
+                    String request = null;
+                    Properties headers = null;
+                    byte[] content = null;
                     InputStream inputStream = client.getInputStream();
                     try {
                         BufferedInputStream bis = new BufferedInputStream(inputStream);
                         try {
-                            Properties headers = parseHeader(readHeader(bis));
-                            byte[] content = readContent(bis, headers);
+                            request = readRequest(bis);
+                            headers = parseHeader(readHeader(bis));
+                            content = readContent(bis, headers);
                             lock.lock();
                             try {
                                 if (lastRequest == null) {
@@ -112,8 +127,8 @@ public class CrappyHttpServer implements Runnable {
                             } finally {
                                 lock.unlock();
                             }
-                            Logger.getLogger(getClass().getName()).log(Level.FINE, "Recieved request from {0}\nHeaders:\n--------\n{1}\n\nBody:\n-----\n{2}\n\n",
-                                    new Object[]{client.getRemoteSocketAddress(), headers, new String(content, "UTF-8")});
+                            Logger.getLogger(getClass().getName()).log(Level.FINE, "Recieved request from {0} for {3}\nHeaders:\n--------\n{1}\n\nBody:\n-----\n{2}\n\n",
+                                    new Object[]{client.getRemoteSocketAddress(), headers, new String(content, "UTF-8"), request});
                         } finally {
                             bis.close();
                         }
@@ -121,12 +136,22 @@ public class CrappyHttpServer implements Runnable {
                         inputStream.close();
                     }
 
+                    Response response = DEFAULT_RESPONSE;
+                    if (request != null) {
+                        int methodEnd = request.indexOf(' ');
+                        int pathEnd = request.indexOf(' ', methodEnd + 1);
+                        String key = request.substring(0, methodEnd).toUpperCase() + " " +
+                                request.substring(methodEnd + 1, pathEnd);
+                        if (responses.containsKey(key)) {
+                            response = responses.get(key);
+                        }
+                    }
 
                     OutputStream outputStream = client.getOutputStream();
                     try {
-                        byte[] responseContent = createResponseContent();
-                        byte[] responseHeader = createResponseHeader(responseContent);
-                        
+                        byte[] responseContent = response.getContent();
+                        byte[] responseHeader = createResponseHeader(response.getContentType(), responseContent);
+
                         outputStream.write(responseHeader);
                         outputStream.write(responseContent);
                         outputStream.write(0);
@@ -151,6 +176,18 @@ public class CrappyHttpServer implements Runnable {
         }
     }
 
+    private String readRequest(InputStream is) throws IOException {
+        ByteArrayOutputStream request = new ByteArrayOutputStream();
+        int b;
+        while (-1 != (b = is.read())) {
+            request.write(b);
+            if (b == 13 || b == 10) {
+                break;
+            }
+        }
+        return new String(request.toByteArray(), "UTF-8");
+    }
+
     private byte[] readContent(BufferedInputStream bis, Properties headers) throws IOException {
         String strLength = headers.getProperty("Content-Length", "0");
         int length = Integer.parseInt(strLength);
@@ -163,20 +200,20 @@ public class CrappyHttpServer implements Runnable {
         BufferedReader r = new BufferedReader(new InputStreamReader(headerInputStream));
 
         Properties headers = new Properties();
-        String request = r.readLine(); // ignore the request line
 
         String line;
-        while (null != (line = r.readLine()) && line.trim().length() > 0) {
+        while (null != (line = r.readLine())) {
             int index = line.indexOf(':');
-            headers.setProperty(line.substring(0, index).trim(), line.substring(index + 1).trim());
+            if (index > 0) {
+                headers.setProperty(line.substring(0, index).trim(), line.substring(index + 1).trim());
+            }
         }
-        headers.setProperty("REQUEST", request);
         return headers;
     }
 
     private InputStream readHeader(InputStream bis) throws IOException {
         ByteArrayOutputStream header = new ByteArrayOutputStream();
-        int state = 0;
+        int state = 1; // because we at least had a CR from the request
         int b;
         while (state != 4 && -1 != (b = bis.read())) {
             header.write(b);
@@ -196,19 +233,21 @@ public class CrappyHttpServer implements Runnable {
         return new ByteArrayInputStream(header.toByteArray());
     }
 
-    private byte[] createResponseHeader(byte[] content) throws UnsupportedEncodingException {
+    private byte[] createResponseHeader(String contentType, byte[] content) throws UnsupportedEncodingException {
         StringBuilder buf = new StringBuilder();
         buf.append("HTTP/1.1 200 OK\r\n");
         buf.append("Content-Length: ");
         buf.append(content.length);
         buf.append("\r\n");
         buf.append("Connection: close\r\n");
-        buf.append("Content-Type: application/soap+xml; charset=utf-8\r\n");
+        buf.append("Content-Type: ");
+        buf.append(contentType);
+        buf.append("\r\n");
         buf.append("\r\n");
         return buf.toString().getBytes("UTF-8");
     }
 
-    private byte[] createResponseContent() throws UnsupportedEncodingException {
+    private static byte[] createDefaultResponseContent() {
         StringBuilder buf = new StringBuilder();
         buf.append("<?xml version=\"1.0\"?>\n" +
                 "<SOAP-ENV:Envelope\n" +
@@ -224,10 +263,32 @@ public class CrappyHttpServer implements Runnable {
                 "      </SOAP-ENV:Fault>\n" +
                 "  </SOAP-ENV:Body>\n" +
                 "</SOAP-ENV:Envelope>\n");
-        return buf.toString().getBytes("UTF-8");
+        try {
+            return buf.toString().getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return buf.toString().getBytes();
+        }
     }
 
     public static void main(String[] args) throws IOException {
         new CrappyHttpServer(8080).run();
+    }
+
+    private static final class Response {
+        private final String contentType;
+        private final byte[] content;
+
+        private Response(String contentType, byte[] content) {
+            this.contentType = contentType;
+            this.content = content;
+        }
+
+        public String getContentType() {
+            return contentType;
+        }
+
+        public byte[] getContent() {
+            return content;
+        }
     }
 }
