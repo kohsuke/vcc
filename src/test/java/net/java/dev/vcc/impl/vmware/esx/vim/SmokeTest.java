@@ -91,7 +91,6 @@ public class SmokeTest {
         Thread thread = new Thread(server);
         thread.start();
         try {
-            System.out.println("Listening on port " + server.getLocalPort());
             final VimPortType proxy = ConnectionManager.getConnection("http://localhost:" + server.getLocalPort() + "/sdk");
             final BindingProvider bindingProvider = (BindingProvider) proxy;
             bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,

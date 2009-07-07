@@ -98,7 +98,6 @@ public class SmokeTest {
         Thread thread = new Thread(server);
         thread.start();
         try {
-            System.out.println("Listening on port " + server.getLocalPort());
             final VimPortType proxy = ConnectionManager.getConnection("http://localhost:" + server.getLocalPort() + "/sdk");
             TraversalSpec resourcePoolTraversalSpec = Helper
                     .newTraversalSpec("resourcePoolTraversalSpec", "ResourcePool", "resourcePool", false,

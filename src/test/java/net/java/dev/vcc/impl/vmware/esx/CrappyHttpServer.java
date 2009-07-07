@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -85,11 +87,15 @@ public class CrappyHttpServer implements Runnable {
     }
 
     public void run() {
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "Listening for incomming connections on {0}",
+                socket.getLocalSocketAddress());
         try {
             socket.setSoTimeout(100);
             while (!stop) {
                 try {
                     Socket client = socket.accept();
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "Incomming connection from {0}",
+                            client.getRemoteSocketAddress());
                     InputStream inputStream = client.getInputStream();
                     try {
                         BufferedInputStream bis = new BufferedInputStream(inputStream);
@@ -106,6 +112,8 @@ public class CrappyHttpServer implements Runnable {
                             } finally {
                                 lock.unlock();
                             }
+                            Logger.getLogger(getClass().getName()).log(Level.FINE, "Recieved request from {0}\nHeaders:\n--------\n{1}\n\nBody:\n-----\n{2}\n\n",
+                                    new Object[]{client.getRemoteSocketAddress(), headers, new String(content, "UTF-8")});
                         } finally {
                             bis.close();
                         }
@@ -155,13 +163,14 @@ public class CrappyHttpServer implements Runnable {
         BufferedReader r = new BufferedReader(new InputStreamReader(headerInputStream));
 
         Properties headers = new Properties();
-        r.readLine(); // ignore the request line
+        String request = r.readLine(); // ignore the request line
 
         String line;
         while (null != (line = r.readLine()) && line.trim().length() > 0) {
             int index = line.indexOf(':');
             headers.setProperty(line.substring(0, index).trim(), line.substring(index + 1).trim());
         }
+        headers.setProperty("REQUEST", request);
         return headers;
     }
 
