@@ -12,14 +12,11 @@ import net.java.dev.vcc.impl.vmware.esx.CrappyHttpServer;
 import net.java.dev.vcc.impl.vmware.esx.Environment;
 import net.java.dev.vcc.impl.vmware.esx.JavaBeanHelper;
 import net.java.dev.vcc.impl.vmware.esx.StringContainsMatcher;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assume.assumeThat;
-import org.junit.Test;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.junit.Assume.*;
+import org.junit.*;
 
-import javax.xml.ws.BindingProvider;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
@@ -101,9 +98,6 @@ public class SmokeTest {
         try {
             final VimPortType proxy = ConnectionManager
                     .getConnection("http://localhost:" + server.getLocalPort() + "/sdk");
-            final BindingProvider bindingProvider = (BindingProvider) proxy;
-            bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
-                    "http://localhost:" + server.getLocalPort() + "/sdk");
 
             TraversalSpec resourcePoolTraversalSpec = Helper
                     .newTraversalSpec("resourcePoolTraversalSpec", "ResourcePool", "resourcePool", false,
@@ -159,6 +153,4 @@ public class SmokeTest {
             thread.join();
         }
     }
-
-
 }
