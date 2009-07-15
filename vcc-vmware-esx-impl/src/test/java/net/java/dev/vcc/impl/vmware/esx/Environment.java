@@ -65,4 +65,8 @@ public final class Environment {
     public static String getPassword() {
         return System.getProperty("test.vmware.esx.password", ResourceHolder.env.getProperty("password", ""));
     }
+
+    public static String getVirtualComputer() {
+        return System.getProperty("test.vmware.esx.computer", ResourceHolder.env.getProperty("computer", ""));
+    }
 }
