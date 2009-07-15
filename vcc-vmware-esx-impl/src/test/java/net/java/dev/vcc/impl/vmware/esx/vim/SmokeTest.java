@@ -1,19 +1,25 @@
 package net.java.dev.vcc.impl.vmware.esx.vim;
 
-import com.vmware.vim.*;
+import com.vmware.vim.ManagedObjectReference;
+import com.vmware.vim.ObjectContent;
+import com.vmware.vim.PropertyFilterSpec;
+import com.vmware.vim.PropertySpec;
+import com.vmware.vim.ServiceContent;
+import com.vmware.vim.TraversalSpec;
+import com.vmware.vim.UserSession;
+import com.vmware.vim.VimPortType;
 import net.java.dev.vcc.impl.vmware.esx.CrappyHttpServer;
+import net.java.dev.vcc.impl.vmware.esx.Environment;
 import net.java.dev.vcc.impl.vmware.esx.JavaBeanHelper;
 import net.java.dev.vcc.impl.vmware.esx.StringContainsMatcher;
-import org.junit.Ignore;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assume.assumeThat;
 import org.junit.Test;
-import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
 
-import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
@@ -22,15 +28,17 @@ import java.util.concurrent.TimeUnit;
  */
 public class SmokeTest {
 
-    private static final String URL = "http or https://vmware esx or vmware server hostname/sdk";
+    private static final String URL = Environment.getUrl();
 
-    private static final String USERNAME = "please populate";
+    private static final String USERNAME = Environment.getUsername();
 
-    private static final String PASSWORD = "please populate";
+    private static final String PASSWORD = Environment.getPassword();
 
-    @Ignore("Provide proper connection details")
     @Test
     public void smokeTest() throws Exception {
+
+        assumeThat(URL, notNullValue()); // need a test environment to run this test
+        assumeThat(URL, is(not(""))); // need a test environment to run this test
 
         final VimPortType proxy = ConnectionManager.getConnection(URL);
         final ManagedObjectReference serviceInstance = ConnectionManager.getServiceInstance();
@@ -87,11 +95,12 @@ public class SmokeTest {
 
     @Test
     public void jaxwsSendsTheFullRequest() throws Exception {
-            CrappyHttpServer server = new CrappyHttpServer(8080);
+        CrappyHttpServer server = new CrappyHttpServer(8080);
         Thread thread = new Thread(server);
         thread.start();
         try {
-            final VimPortType proxy = ConnectionManager.getConnection("http://localhost:" + server.getLocalPort() + "/sdk");
+            final VimPortType proxy = ConnectionManager
+                    .getConnection("http://localhost:" + server.getLocalPort() + "/sdk");
             final BindingProvider bindingProvider = (BindingProvider) proxy;
             bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
                     "http://localhost:" + server.getLocalPort() + "/sdk");
@@ -139,7 +148,7 @@ public class SmokeTest {
                 }
             };
             requestMaker.setDaemon(true);
-            
+
             server.clearRequest();
             requestMaker.start();
             assertThat("The request maker made a request", server.awaitRequest(1, TimeUnit.SECONDS), is(true));
