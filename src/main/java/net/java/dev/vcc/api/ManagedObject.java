@@ -5,7 +5,7 @@ import java.util.Set;
 /**
  * Represents an object in a {@link net.java.dev.vcc.api.Datacenter}
  */
-public interface ManagedObject<T extends ManagedObject> {
+public interface ManagedObject<T extends ManagedObject<T>> {
 
     ManagedObjectId<T> getId();
 
