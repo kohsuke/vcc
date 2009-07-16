@@ -76,6 +76,42 @@ public abstract class AbstractDatacenter extends AbstractManagedObject<Datacente
     /**
      * {@inheritDoc}
      */
+    public Set<Host> getAllHosts()
+    {
+        Set<Host> result = new HashSet<Host>( getHosts() );
+        for (ResourceGroup group: getResourceGroups()) {
+            result.addAll( group.getAllHosts() );
+        }
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Set<Computer> getAllComputers()
+    {
+        Set<Computer> result = new HashSet<Computer>( getComputers() );
+        for (ResourceGroup group: getResourceGroups()) {
+            result.addAll( group.getAllComputers() );
+        }
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Set<ResourceGroup> getAllResourceGroups()
+    {
+        Set<ResourceGroup> result = new HashSet<ResourceGroup>( getResourceGroups() );
+        for (ResourceGroup group: getResourceGroups()) {
+            result.addAll( group.getAllResourceGroups() );
+        }
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public final Set<Class<? extends Command>> getCommands(Class<? extends ManagedObject> managedObjectClass) {
         Set<Class<? extends Command>> result = capabilities.get(managedObjectClass);
         return result == null ? Collections.<Class<? extends Command>>emptySet() : result;

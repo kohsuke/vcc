@@ -7,21 +7,7 @@ import java.util.Set;
  *
  * @author Stephen Connolly
  */
-public interface Datacenter extends ManagedObject<Datacenter>, CapabilityProfile {
-
-    /**
-     * Gets all the hosts available for running virtual computers that are controlled by this connection.
-     *
-     * @return the hosts available for running virtual computers that are controlled by this connection.
-     */
-    Set<Host> getHosts();
-
-    /**
-     * Gets all the virtual computers that are controllable from this connection.
-     *
-     * @return the virtual computers that are controllable from this connection.
-     */
-    Set<Computer> getComputers();
+public interface Datacenter extends ManagedObject<Datacenter>, CapabilityProfile, ResourceContainer {
 
     /**
      * Gets all the power states that are supported by this connection.
@@ -49,6 +35,5 @@ public interface Datacenter extends ManagedObject<Datacenter>, CapabilityProfile
      * @return {@code true} if the connection is open.
      */
     boolean isOpen();
-
 
 }
