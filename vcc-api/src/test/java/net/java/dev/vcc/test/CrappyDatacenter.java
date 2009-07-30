@@ -1,6 +1,12 @@
 package net.java.dev.vcc.test;
 
-import net.java.dev.vcc.api.*;
+import net.java.dev.vcc.api.Command;
+import net.java.dev.vcc.api.Computer;
+import net.java.dev.vcc.api.Datacenter;
+import net.java.dev.vcc.api.Host;
+import net.java.dev.vcc.api.ManagedObjectId;
+import net.java.dev.vcc.api.PowerState;
+import net.java.dev.vcc.api.ResourceGroup;
 import net.java.dev.vcc.spi.AbstractDatacenter;
 
 import java.util.Collections;
@@ -33,6 +39,11 @@ public class CrappyDatacenter extends AbstractDatacenter {
         return Collections.emptySet();
     }
 
+    public Set<ResourceGroup> getResourceGroups() {
+        checkOpen();
+        return Collections.emptySet();
+    }
+
     public Set<PowerState> getAllowedStates() {
         checkOpen();
         return Collections.singleton(PowerState.STOPPED);
@@ -57,7 +68,9 @@ public class CrappyDatacenter extends AbstractDatacenter {
 
     private void checkOpen() {
         synchronized (lock) {
-            if (!open) throw new IllegalStateException("Connection is already closed");
+            if (!open) {
+                throw new IllegalStateException("Connection is already closed");
+            }
         }
     }
 
@@ -90,7 +103,8 @@ public class CrappyDatacenter extends AbstractDatacenter {
                 return null;
             }
 
-            public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            public Object get(long timeout, TimeUnit unit)
+                    throws InterruptedException, ExecutionException, TimeoutException {
                 return null;
             }
         });

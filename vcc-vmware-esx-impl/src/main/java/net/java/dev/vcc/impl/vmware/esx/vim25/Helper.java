@@ -9,6 +9,9 @@ import com.vmware.vim25.SelectionSpec;
 import com.vmware.vim25.TraversalSpec;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA. User: connollys Date: Jun 30, 2009 Time: 12:38:05 PM To change this template use File |
@@ -93,5 +96,13 @@ public final class Helper {
         }
         pSpec.getPathSet().addAll(Arrays.asList(pathSets));
         return pSpec;
+    }
+
+    public static Map<String, Object> asMap(List<DynamicProperty> propSet) {
+        Map<String, Object> result = new HashMap<String, Object>();
+        for (DynamicProperty prop : propSet) {
+            result.put(prop.getName(), prop.getVal());
+        }
+        return result;
     }
 }
