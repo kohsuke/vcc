@@ -1,8 +1,5 @@
 package net.java.dev.vcc.impl.vmware.esx;
 
-import com.vmware.vim25.InvalidLocaleFaultMsg;
-import com.vmware.vim25.InvalidLoginFaultMsg;
-import com.vmware.vim25.RuntimeFaultFaultMsg;
 import net.java.dev.vcc.spi.AbstractDatacenter;
 import net.java.dev.vcc.spi.DatacenterConnection;
 
@@ -21,15 +18,7 @@ public class ViDatacenterConnection implements DatacenterConnection {
         try {
             ViConnection connection = new ViConnection(url.substring("vcc+vi+".length()), username, password);
             return new ViDatacenter(new ViDatacenterId(url), connection);
-        } catch (RuntimeFaultFaultMsg e) {
-            IOException ioe = new IOException(e.getMessage());
-            ioe.initCause(e);
-            throw ioe;
-        } catch (InvalidLocaleFaultMsg e) {
-            IOException ioe = new IOException(e.getMessage());
-            ioe.initCause(e);
-            throw ioe;
-        } catch (InvalidLoginFaultMsg e) {
+        } catch (Exception e) {
             IOException ioe = new IOException(e.getMessage());
             ioe.initCause(e);
             throw ioe;

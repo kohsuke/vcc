@@ -1,9 +1,13 @@
 package net.java.dev.vcc.impl.vmware.esx.vim25;
 
+import com.vmware.vim25.Event;
+import com.vmware.vim25.EventFilterSpec;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.ObjectContent;
+import com.vmware.vim25.ObjectSpec;
 import com.vmware.vim25.PropertyFilterSpec;
 import com.vmware.vim25.PropertySpec;
+import com.vmware.vim25.SelectionSpec;
 import com.vmware.vim25.ServiceContent;
 import com.vmware.vim25.TraversalSpec;
 import com.vmware.vim25.UserSession;
@@ -18,6 +22,9 @@ import static org.junit.Assume.*;
 import org.junit.*;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -85,6 +92,55 @@ public class SmokeTest {
                 JavaBeanHelper.describe(c);
             }
 
+        } finally {
+            proxy.logout(sessionManager);
+        }
+    }
+
+    @Test
+    public void watchEvents() throws Exception {
+        assumeThat(URL, notNullValue()); // need a test environment to run this test
+        assumeThat(URL, is(not(""))); // need a test environment to run this test
+
+        final VimPortType proxy = ConnectionManager.getConnection(URL);
+        final ManagedObjectReference serviceInstance = ConnectionManager.getServiceInstance();
+
+        ServiceContent serviceContent = proxy.retrieveServiceContent(serviceInstance);
+        ManagedObjectReference sessionManager = serviceContent.getSessionManager();
+        UserSession session = proxy.login(sessionManager, USERNAME, PASSWORD, null);
+        try {
+            ManagedObjectReference eventManager = serviceContent.getEventManager();
+            EventFilterSpec eventFilter = new EventFilterSpec();
+            ManagedObjectReference eventHistoryCollector = proxy.createCollectorForEvents(eventManager, eventFilter);
+
+            PropertySpec propSpec = new PropertySpec();
+            propSpec.setAll(false);
+            propSpec.setPathSet(Arrays.asList("latestPage"));
+            propSpec.setType(eventHistoryCollector.getType());
+
+            ObjectSpec objSpec = new ObjectSpec();
+            objSpec.setObj(eventHistoryCollector);
+            objSpec.setSkip(false);
+            objSpec.setSelectSet(Collections.<SelectionSpec>emptyList());
+            PropertyFilterSpec spec = new PropertyFilterSpec();
+            spec.setObjectSet(Arrays.asList(objSpec));
+            spec.setPropSet(Arrays.asList(propSpec));
+
+            proxy.resetCollector(eventHistoryCollector);
+            long finished = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(300);
+            while (System.currentTimeMillis() < finished) {
+                System.out.println("\n\n*** " + new Date() + " ***\n");
+                boolean more;
+                do {
+                    more = false;
+                    List<Event> list = proxy.readNextEvents(eventHistoryCollector, 100);
+                    for (Event event : list) {
+                        JavaBeanHelper.describe(event);
+                        more = true;
+                    }
+                } while (more);
+                TimeUnit.SECONDS.sleep(5);
+            }
         } finally {
             proxy.logout(sessionManager);
         }
