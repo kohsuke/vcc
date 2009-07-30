@@ -3,8 +3,8 @@ package net.java.dev.vcc.util;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A default {@link net.java.dev.vcc.util.PollingTask} implementation that tries to run the
- * task at (on average) a steady interval.
+ * A default {@link net.java.dev.vcc.util.PollingTask} implementation that tries to run the task at (on average) a
+ * steady interval.
  */
 public class DefaultPollingTask
         extends PollingTask {
@@ -16,7 +16,7 @@ public class DefaultPollingTask
      * @param pollTask the task to run.
      * @param interval
      */
-    protected DefaultPollingTask(TaskController controller, Runnable pollTask, long interval, TimeUnit intervalUnit) {
+    public DefaultPollingTask(TaskController controller, Runnable pollTask, long interval, TimeUnit intervalUnit) {
         super(controller, pollTask);
         this.interval = intervalUnit.toNanos(interval) * TO_SECONDS;
     }
