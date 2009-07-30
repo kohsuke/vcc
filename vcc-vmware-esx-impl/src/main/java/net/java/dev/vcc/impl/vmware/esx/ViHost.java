@@ -12,8 +12,13 @@ import java.util.Set;
 
 public class ViHost extends AbstractHost {
 
-    protected ViHost(ManagedObjectId<Host> id) {
+    private final ViDatacenter datacenter;
+    private ViResourceGroup parent;
+
+    ViHost(ViDatacenter datacenter, ManagedObjectId<Host> id, ViResourceGroup parent) {
         super(id);
+        this.datacenter = datacenter;
+        this.parent = parent;
     }
 
     public Set<Class<? extends Command>> getCommands() {

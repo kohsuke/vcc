@@ -15,8 +15,13 @@ import java.util.concurrent.Future;
 
 public class ViComputer extends AbstractComputer {
 
-    protected ViComputer(ManagedObjectId<Computer> id) {
+    private final ViDatacenter datacenter;
+    private ViResourceGroup parent;
+
+    ViComputer(ViDatacenter datacenter, ManagedObjectId<Computer> id, ViResourceGroup parent) {
         super(id);
+        this.datacenter = datacenter;
+        this.parent = parent;
     }
 
     public Set<Class<? extends Command>> getCommands() {

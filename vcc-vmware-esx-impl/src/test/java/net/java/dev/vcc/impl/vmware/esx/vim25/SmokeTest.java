@@ -1,12 +1,15 @@
 package net.java.dev.vcc.impl.vmware.esx.vim25;
 
+import com.vmware.vim25.DynamicProperty;
 import com.vmware.vim25.Event;
 import com.vmware.vim25.EventFilterSpec;
+import com.vmware.vim25.InvalidPropertyFaultMsg;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.ObjectContent;
 import com.vmware.vim25.ObjectSpec;
 import com.vmware.vim25.PropertyFilterSpec;
 import com.vmware.vim25.PropertySpec;
+import com.vmware.vim25.RuntimeFaultFaultMsg;
 import com.vmware.vim25.SelectionSpec;
 import com.vmware.vim25.ServiceContent;
 import com.vmware.vim25.TraversalSpec;
@@ -24,7 +27,9 @@ import org.junit.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -144,6 +149,78 @@ public class SmokeTest {
         } finally {
             proxy.logout(sessionManager);
         }
+    }
+
+    @Test
+    public void navigate() throws Exception {
+        assumeThat(URL, notNullValue()); // need a test environment to run this test
+        assumeThat(URL, is(not(""))); // need a test environment to run this test
+
+        final VimPortType proxy = ConnectionManager.getConnection(URL);
+        final ManagedObjectReference serviceInstance = ConnectionManager.getServiceInstance();
+
+        ServiceContent serviceContent = proxy.retrieveServiceContent(serviceInstance);
+        ManagedObjectReference sessionManager = serviceContent.getSessionManager();
+        UserSession session = proxy.login(sessionManager, USERNAME, PASSWORD, null);
+        try {
+            ManagedObjectReference rootFolder = serviceContent.getRootFolder();
+            listChildren("    ", proxy, serviceContent, rootFolder, "childEntity", "hostFolder", "childEntity",
+                    "resourcePool", "vm");
+        } finally {
+            proxy.logout(sessionManager);
+        }
+    }
+
+    private void listChildren(String depth, VimPortType proxy, ServiceContent serviceContent,
+                              ManagedObjectReference parent,
+                              String... path)
+            throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg {
+        if (path.length == 0) {
+            return;
+        }
+        String[] childPath = new String[path.length - 1];
+        System.arraycopy(path, 1, childPath, 0, childPath.length);
+        Map<String, ManagedObjectReference> c1 = getChildEntities(proxy, serviceContent, parent, parent.getType(),
+                path[0]
+        );
+        for (ManagedObjectReference mp : c1.values()) {
+            if (mp.getValue().equals(parent.getValue())) {
+                continue;
+            }
+            System.out.println(depth + mp.getType() + " -> " + mp.getValue());
+            try {
+                listChildren("    " + depth, proxy, serviceContent, mp, childPath);
+            } catch (InvalidPropertyFaultMsg e) {
+                // ignore
+            }
+        }
+    }
+
+
+    private Map<String, ManagedObjectReference> getChildEntities(VimPortType portType, ServiceContent serviceContent,
+                                                                 ManagedObjectReference rootFolder, String type,
+                                                                 String path
+    )
+            throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg {
+        Map<String, ManagedObjectReference> children = new HashMap<String, ManagedObjectReference>();
+        PropertyFilterSpec spec = Helper.newPropertyFilterSpec(Helper.newPropertySpec("ManagedEntity", false, "name"),
+                Helper.newObjectSpec(rootFolder, false, Helper
+                        .newTraversalSpec("folderTraversalSpec", type, path, false,
+                        Helper.newSelectionSpec("folderTraversalSpec"))));
+        for (ObjectContent c : portType
+                .retrieveProperties(serviceContent.getPropertyCollector(), Arrays.asList(spec))) {
+            String name = null;
+            for (DynamicProperty p : c.getPropSet()) {
+                if ("name".equals(p.getName()) && p.getVal() instanceof String) {
+                    name = (String) p.getVal();
+                    break;
+                }
+            }
+            if (name != null) {
+                children.put(name, c.getObj());
+            }
+        }
+        return children;
     }
 
     @Test

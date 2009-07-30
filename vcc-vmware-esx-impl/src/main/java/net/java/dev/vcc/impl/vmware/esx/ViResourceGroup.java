@@ -14,12 +14,17 @@ import java.util.Set;
 
 public class ViResourceGroup extends AbstractResourceGroup {
 
+    private final ViDatacenter datacenter;
+    private ViResourceGroup parent;
     private final Set<ViHost> hosts = Collections.synchronizedSet(new HashSet<ViHost>());
     private final Set<ViComputer> computers = Collections.synchronizedSet(new HashSet<ViComputer>());
     private final Set<ViResourceGroup> resourceGroups = Collections.synchronizedSet(new HashSet<ViResourceGroup>());
 
-    protected ViResourceGroup(ManagedObjectId<ResourceGroup> id) {
+    ViResourceGroup(ViDatacenter datacenter, ManagedObjectId<ResourceGroup> id,
+                    ViResourceGroup parent) {
         super(id);
+        this.datacenter = datacenter;
+        this.parent = parent;
     }
 
     public Set<Class<? extends Command>> getCommands() {
