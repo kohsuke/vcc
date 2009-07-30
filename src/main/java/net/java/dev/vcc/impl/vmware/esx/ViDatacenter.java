@@ -5,6 +5,7 @@ import net.java.dev.vcc.api.Command;
 import net.java.dev.vcc.api.Computer;
 import net.java.dev.vcc.api.Host;
 import net.java.dev.vcc.api.PowerState;
+import net.java.dev.vcc.api.ResourceGroup;
 import net.java.dev.vcc.api.profiles.BasicProfile;
 import net.java.dev.vcc.spi.AbstractDatacenter;
 import net.java.dev.vcc.util.CompletedFuture;
@@ -31,6 +32,7 @@ public class ViDatacenter extends AbstractDatacenter {
     private ViConnection connection;
     private ExecutorService connectionExecutor = Executors.newCachedThreadPool(new ViThreadFactory());
     private final Set<ViHost> hosts = Collections.synchronizedSet(new HashSet<ViHost>());
+    private final Set<ViResourceGroup> resourceGroups = Collections.synchronizedSet(new HashSet<ViResourceGroup>());
 
     ViDatacenter(ViDatacenterId id, ViConnection connection) {
         super(id, BasicProfile.getInstance()); // TODO get capabilities
@@ -53,6 +55,10 @@ public class ViDatacenter extends AbstractDatacenter {
 
     public Set<Host> getHosts() {
         return Collections.unmodifiableSet(new HashSet<Host>(hosts));
+    }
+
+    public Set<ResourceGroup> getResourceGroups() {
+        return Collections.unmodifiableSet(new HashSet<ResourceGroup>(resourceGroups));
     }
 
     public Set<Computer> getComputers() {

@@ -91,6 +91,66 @@ public class SmokeTest {
     }
 
     @Test
+    public void listVirtualComputers() throws Exception {
+
+        assumeThat(URL, notNullValue()); // need a test environment to run this test
+        assumeThat(URL, is(not(""))); // need a test environment to run this test
+
+        final VimPortType proxy = ConnectionManager.getConnection(URL);
+        final ManagedObjectReference serviceInstance = ConnectionManager.getServiceInstance();
+
+        ServiceContent serviceContent = proxy.retrieveServiceContent(serviceInstance);
+        ManagedObjectReference sessionManager = serviceContent.getSessionManager();
+        UserSession session = proxy.login(sessionManager, USERNAME, PASSWORD, null);
+        try {
+            TraversalSpec resourcePoolTraversalSpec = Helper
+                    .newTraversalSpec("resourcePoolTraversalSpec", "ResourcePool", "resourcePool", false,
+                            Helper.newSelectionSpec("resourcePoolTraversalSpec"));
+
+            TraversalSpec computeResourceRpTraversalSpec = Helper
+                    .newTraversalSpec("computeResourceRpTraversalSpec", "ComputeResource", "resourcePool", false,
+                            Helper.newSelectionSpec("resourcePoolTraversalSpec"));
+
+            TraversalSpec computeResourceHostTraversalSpec = Helper
+                    .newTraversalSpec("computeResourceHostTraversalSpec", "ComputeResource", "host", false);
+
+            TraversalSpec datacenterHostTraversalSpec = Helper
+                    .newTraversalSpec("datacenterHostTraversalSpec", "Datacenter", "hostFolder", false,
+                            Helper.newSelectionSpec("folderTraversalSpec"));
+
+            TraversalSpec datacenterVmTraversalSpec = Helper
+                    .newTraversalSpec("datacenterVmTraversalSpec", "Datacenter", "vmFolder", false,
+                            Helper.newSelectionSpec("folderTraversalSpec"));
+
+            TraversalSpec folderTraversalSpec = Helper
+                    .newTraversalSpec("folderTraversalSpec", "Folder", "childEntity", false,
+                            Helper.newSelectionSpec("folderTraversalSpec"),
+                            datacenterHostTraversalSpec,
+                            datacenterVmTraversalSpec,
+                            computeResourceRpTraversalSpec,
+                            computeResourceHostTraversalSpec,
+                            resourcePoolTraversalSpec);
+
+            PropertySpec meName = Helper.newPropertySpec("ManagedEntity", false, "name");
+
+            PropertyFilterSpec spec = Helper.newPropertyFilterSpec(meName,
+                    Helper.newObjectSpec(serviceContent.getRootFolder(), false, folderTraversalSpec));
+
+            for (ObjectContent c : proxy
+                    .retrieveProperties(serviceContent.getPropertyCollector(), Arrays.asList(spec))) {
+                if ("VirtualMachine".equals(c.getObj().getType())) {
+                    System.out.println("Virtual Computer: " + Helper.asMap(c.getPropSet()).get("name"));
+                } else {
+                    System.out.println("***" + c.getObj().getType());
+                }
+            }
+
+        } finally {
+            proxy.logout(sessionManager);
+        }
+    }
+
+    @Test
     public void jaxwsSendsTheFullRequest() throws Exception {
         CrappyHttpServer server = new CrappyHttpServer(8080);
         Thread thread = new Thread(server);
