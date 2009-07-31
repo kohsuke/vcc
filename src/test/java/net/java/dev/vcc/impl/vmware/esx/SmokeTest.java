@@ -23,6 +23,7 @@ public class SmokeTest {
         assumeThat(URL, is(not(""))); // need a test environment to run this test
 
         Datacenter datacenter = new ViDatacenterConnection().connect("vcc+vi+" + URL, USERNAME, PASSWORD.toCharArray());
+        JavaBeanHelper.describe(datacenter);
         try {
             Thread.sleep(30000);
         } finally {

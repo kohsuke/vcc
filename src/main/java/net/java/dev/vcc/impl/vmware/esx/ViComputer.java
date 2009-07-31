@@ -13,15 +13,17 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-public class ViComputer extends AbstractComputer {
+final class ViComputer extends AbstractComputer {
 
     private final ViDatacenter datacenter;
     private ViResourceGroup parent;
+    private String name;
 
-    ViComputer(ViDatacenter datacenter, ManagedObjectId<Computer> id, ViResourceGroup parent) {
+    ViComputer(ViDatacenter datacenter, ManagedObjectId<Computer> id, ViResourceGroup parent, String name) {
         super(id);
         this.datacenter = datacenter;
         this.parent = parent;
+        this.name = name;
     }
 
     public Set<Class<? extends Command>> getCommands() {
@@ -66,10 +68,23 @@ public class ViComputer extends AbstractComputer {
     }
 
     public String getName() {
-        return "";
+        return name;
     }
 
     public String getDescription() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public ViComputerId getId() {
+        return (ViComputerId) super.getId();
+    }
+
+    void setParent(ViResourceGroup parent) {
+        this.parent = parent;
+    }
+
+    void setName(String name) {
+        this.name = name;
     }
 }

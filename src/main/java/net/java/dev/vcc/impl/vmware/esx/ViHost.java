@@ -4,21 +4,31 @@ import net.java.dev.vcc.api.Command;
 import net.java.dev.vcc.api.Computer;
 import net.java.dev.vcc.api.Host;
 import net.java.dev.vcc.api.ManagedObjectId;
+import net.java.dev.vcc.api.ResourceGroup;
 import net.java.dev.vcc.spi.AbstractHost;
 import net.java.dev.vcc.util.CompletedFuture;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
-public class ViHost extends AbstractHost {
+final class ViHost extends AbstractHost {
 
     private final ViDatacenter datacenter;
+    private String name;
     private ViResourceGroup parent;
+    private final Map<ViComputerId, ViComputer> computers = Collections
+            .synchronizedMap(new HashMap<ViComputerId, ViComputer>());
+    private final Map<ViResourceGroupId, ViResourceGroup> resourceGroups = Collections
+            .synchronizedMap(new HashMap<ViResourceGroupId, ViResourceGroup>());
 
-    ViHost(ViDatacenter datacenter, ManagedObjectId<Host> id, ViResourceGroup parent) {
+    ViHost(ViDatacenter datacenter, ManagedObjectId<Host> id, ViResourceGroup parent, String name) {
         super(id);
         this.datacenter = datacenter;
         this.parent = parent;
+        this.name = name;
     }
 
     public Set<Class<? extends Command>> getCommands() {
@@ -30,11 +40,44 @@ public class ViHost extends AbstractHost {
         return command;
     }
 
+    public Set<ResourceGroup> getResourceGroups() {
+        return Collections.unmodifiableSet(new HashSet<ResourceGroup>(resourceGroups.values()));
+    }
+
     public Set<Computer> getComputers() {
-        return Collections.emptySet();
+        return Collections.unmodifiableSet(new HashSet<Computer>(computers.values()));
     }
 
     public String getName() {
-        return "";
+        return name;
+    }
+
+    void setName(String name) {
+        this.name = name;
+    }
+
+    void setParent(ViResourceGroup parent) {
+        this.parent = parent;
+    }
+
+    void addComputer(ViComputer viComputer) {
+        computers.put(viComputer.getId(), viComputer);
+    }
+
+    public void addResourceGroup(ViResourceGroup viResourceGroup) {
+        resourceGroups.put(viResourceGroup.getId(), viResourceGroup);
+    }
+
+    void removeComputer(ViComputer viComputer) {
+        computers.remove(viComputer.getId());
+    }
+
+    public void removeResourceGroup(ViResourceGroup viResourceGroup) {
+        resourceGroups.remove(viResourceGroup.getId());
+    }
+
+    @Override
+    public ViHostId getId() {
+        return (ViHostId) super.getId();
     }
 }

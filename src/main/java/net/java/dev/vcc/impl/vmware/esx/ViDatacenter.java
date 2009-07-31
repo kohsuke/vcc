@@ -7,6 +7,7 @@ import com.vmware.vim25.InvalidPropertyFaultMsg;
 import com.vmware.vim25.InvalidStateFaultMsg;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.ObjectContent;
+import com.vmware.vim25.ObjectSpec;
 import com.vmware.vim25.PropertyFilterSpec;
 import com.vmware.vim25.PropertySpec;
 import com.vmware.vim25.RuntimeFaultFaultMsg;
@@ -19,13 +20,17 @@ import net.java.dev.vcc.api.ResourceGroup;
 import net.java.dev.vcc.api.profiles.BasicProfile;
 import net.java.dev.vcc.impl.vmware.esx.vim25.Helper;
 import net.java.dev.vcc.spi.AbstractDatacenter;
+import net.java.dev.vcc.spi.AbstractManagedObject;
 import net.java.dev.vcc.util.CompletedFuture;
 import net.java.dev.vcc.util.DefaultPollingTask;
 import net.java.dev.vcc.util.TaskController;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +50,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * A VMware ESX Datacenter.
  */
-public class ViDatacenter extends AbstractDatacenter {
+final class ViDatacenter extends AbstractDatacenter {
 
     private final TaskController taskController = new ViTaskController();
     private final Lock connectionLock = new ReentrantLock();
@@ -54,9 +59,11 @@ public class ViDatacenter extends AbstractDatacenter {
     private final Condition closedCondition = connectionLock.newCondition();
     private ViConnection connection;
     private ExecutorService connectionExecutor = Executors.newCachedThreadPool(new ViThreadFactory());
-    private final Set<ViHost> hosts = Collections.synchronizedSet(new HashSet<ViHost>());
-    private final Set<ViResourceGroup> resourceGroups = Collections.synchronizedSet(new HashSet<ViResourceGroup>());
+    private final Map<ViHostId, ViHost> hosts = Collections.synchronizedMap(new HashMap<ViHostId, ViHost>());
+    private final Map<ViResourceGroupId, ViResourceGroup> resourceGroups = Collections
+            .synchronizedMap(new HashMap<ViResourceGroupId, ViResourceGroup>());
     private ViDatacenter.ViEventCollector eventCollector;
+    private ManagedObjectReference rootFolder;
 
     ViDatacenter(ViDatacenterId id, ViConnection connection)
             throws RuntimeFaultFaultMsg, InvalidStateFaultMsg, InvalidPropertyFaultMsg {
@@ -68,50 +75,122 @@ public class ViDatacenter extends AbstractDatacenter {
         connectionExecutor.submit(new DefaultPollingTask(taskController, eventCollector, 1, TimeUnit.SECONDS));
 
         // 2. find what's out there
-        TraversalSpec resourcePoolTraversalSpec = Helper
-                .newTraversalSpec("resourcePoolTraversalSpec", "ResourcePool", "resourcePool", false,
-                        Helper.newSelectionSpec("resourcePoolTraversalSpec"));
-
-        TraversalSpec computeResourceRpTraversalSpec = Helper
-                .newTraversalSpec("computeResourceRpTraversalSpec", "ComputeResource", "resourcePool", false,
-                        Helper.newSelectionSpec("resourcePoolTraversalSpec"));
-
-        TraversalSpec computeResourceHostTraversalSpec = Helper
-                .newTraversalSpec("computeResourceHostTraversalSpec", "ComputeResource", "host", false);
-
-        TraversalSpec datacenterHostTraversalSpec = Helper
-                .newTraversalSpec("datacenterHostTraversalSpec", "Datacenter", "hostFolder", false,
-                        Helper.newSelectionSpec("folderTraversalSpec"));
-
-        TraversalSpec datacenterVmTraversalSpec = Helper
-                .newTraversalSpec("datacenterVmTraversalSpec", "Datacenter", "vmFolder", false,
-                        Helper.newSelectionSpec("folderTraversalSpec"));
-
         TraversalSpec folderTraversalSpec = Helper
                 .newTraversalSpec("folderTraversalSpec", "Folder", "childEntity", false,
                         Helper.newSelectionSpec("folderTraversalSpec"),
-                        datacenterHostTraversalSpec,
-                        datacenterVmTraversalSpec,
-                        computeResourceRpTraversalSpec,
-                        computeResourceHostTraversalSpec,
-                        resourcePoolTraversalSpec);
+                        Helper.newTraversalSpec("datacenterHostTraversalSpec", "Datacenter", "hostFolder", false,
+                                Helper.newSelectionSpec("folderTraversalSpec")),
+                        Helper.newTraversalSpec("datacenterVmTraversalSpec", "Datacenter", "vmFolder", false,
+                                Helper.newSelectionSpec("folderTraversalSpec")),
+                        Helper.newTraversalSpec("computeResourceRpTraversalSpec", "ComputeResource", "resourcePool",
+                                false,
+                                Helper.newSelectionSpec("resourcePoolTraversalSpec")),
+                        Helper.newTraversalSpec("computeResourceHostTraversalSpec", "ComputeResource", "host",
+                                false),
+                        Helper.newTraversalSpec("resourcePoolTraversalSpec", "ResourcePool", "resourcePool", false,
+                                Helper.newSelectionSpec("resourcePoolTraversalSpec")));
 
-        PropertySpec meName = Helper.newPropertySpec("ManagedEntity", false, "name");
+        rootFolder = connection.getServiceContent().getRootFolder();
+        PropertyFilterSpec spec = Helper.newPropertyFilterSpec(
+                new PropertySpec[]{Helper.newPropertySpec("ManagedEntity", false, "name"),
+                        Helper.newPropertySpec("ManagedEntity", false, "parent"),
+                        Helper.newPropertySpec("VirtualMachine", false, "resourcePool"),
+                },
+                new ObjectSpec[]{Helper.newObjectSpec(rootFolder, false, folderTraversalSpec)});
 
-        PropertyFilterSpec spec = Helper.newPropertyFilterSpec(meName,
-                Helper.newObjectSpec(connection.getServiceContent().getRootFolder(), false, folderTraversalSpec));
-
-        for (ObjectContent c : connection.getProxy()
-                .retrieveProperties(connection.getServiceContent().getPropertyCollector(), Arrays.asList(spec))) {
-            if ("VirtualMachine".equals(c.getObj().getType())) {
-                System.out.println("Virtual Computer: " + Helper.asMap(c.getPropSet()).get("name"));
+        Map<String, AbstractManagedObject> model = new HashMap<String, AbstractManagedObject>();
+        model.put(rootFolder.getValue(), this);
+        Map<String, Collection<AbstractManagedObject>> waiting
+                = new HashMap<String, Collection<AbstractManagedObject>>();
+        List<ObjectContent> entities = connection.getProxy()
+                .retrieveProperties(connection.getServiceContent().getPropertyCollector(),
+                        Collections.singletonList(spec));
+        for (ObjectContent entity : entities) {
+            ManagedObjectReference entityObject = entity.getObj();
+            if (model.containsKey(entityObject.getValue())) {
+                continue;
+            }
+            AbstractManagedObject entityMO;
+            String entityType = entityObject.getType();
+            String entityName = (String) Helper.getDynamicProperty(entity, "name");
+            if ("VirtualMachine".equals(entityType)) {
+                entityMO = new ViComputer(this, new ViComputerId(getId(), entityObject), null, entityName);
+            } else if ("ComputeResource".equals(entityType)) {
+                entityMO = new ViHost(this, new ViHostId(getId(), entityObject), null, entityName);
+            } else if ("ResourcePool".equals(entityType)) {
+                entityMO = new ViResourceGroup(this, new ViResourceGroupId(getId(), entityObject), null, entityName);
+            } else if ("Folder".equals(entityType)) {
+                entityMO = new ViResourceGroup(this, new ViResourceGroupId(getId(), entityObject), null, entityName);
+            } else if ("Datacenter".equals(entityType)) {
+                entityMO = new ViResourceGroup(this, new ViResourceGroupId(getId(), entityObject), null, entityName);
             } else {
-                System.out.println("***" + c.getObj().getType());
+                // unknown object type
+                continue;
+            }
+            ManagedObjectReference parent = (ManagedObjectReference) Helper.getDynamicProperty(entity, "resourcePool");
+            if (parent == null) {
+                parent = (ManagedObjectReference) Helper.getDynamicProperty(entity, "parent");
+            }
+            if (parent != null) {
+                AbstractManagedObject parentMO = model.get(parent.getValue());
+                if (parentMO != null) {
+                    addChildMO(parentMO, entityMO);
+                } else {
+                    Collection<AbstractManagedObject> pendingChildMOs = waiting.get(parent.getValue());
+                    if (pendingChildMOs == null) {
+                        waiting.put(parent.getValue(), pendingChildMOs = new ArrayList<AbstractManagedObject>());
+                    }
+                    pendingChildMOs.add(entityMO);
+                }
+            }
+            Collection<AbstractManagedObject> _waiting = waiting.get(entityObject.getValue());
+            if (_waiting != null) {
+                for (AbstractManagedObject childMO : _waiting) {
+                    addChildMO(entityMO, childMO);
+                }
+                waiting.remove(entityObject.getValue());
+            }
+            model.put(entityObject.getValue(), entityMO);
+        }
+        // 3. start dispatching events
+    }
+
+    private void addChildMO(AbstractManagedObject parentMO, AbstractManagedObject childMO) {
+        if (parentMO instanceof ViHost) {
+            if (childMO instanceof ViComputer) {
+                ((ViHost) parentMO).addComputer((ViComputer) childMO);
+            } else if (childMO instanceof ViResourceGroup) {
+                ((ViHost) parentMO).addResourceGroup((ViResourceGroup) childMO);
+            }
+        } else if (parentMO instanceof ViResourceGroup) {
+            if (childMO instanceof ViComputer) {
+                ((ViResourceGroup) parentMO).addComputer((ViComputer) childMO);
+            } else if (childMO instanceof ViResourceGroup) {
+                ((ViResourceGroup) parentMO).addResourceGroup((ViResourceGroup) childMO);
+            }
+        } else if (parentMO instanceof ViDatacenter) {
+            if (childMO instanceof ViResourceGroup) {
+                ((ViDatacenter) parentMO).addResourceGroup((ViResourceGroup) childMO);
+            } else if (childMO instanceof ViHost) {
+                ((ViDatacenter) parentMO).addHost((ViHost) childMO);
             }
         }
+    }
 
+    void addHost(ViHost viHost) {
+        hosts.put(viHost.getId(), viHost);
+    }
 
-        // 3. start dispatching events
+    void removeHost(ViHost viHost) {
+        hosts.remove(viHost.getId());
+    }
+
+    public void addResourceGroup(ViResourceGroup viResourceGroup) {
+        resourceGroups.put(viResourceGroup.getId(), viResourceGroup);
+    }
+
+    public void removeResourceGroup(ViResourceGroup viResourceGroup) {
+        resourceGroups.remove(viResourceGroup.getId());
     }
 
     public Set<Class<? extends Command>> getCommands() {
@@ -124,11 +203,11 @@ public class ViDatacenter extends AbstractDatacenter {
     }
 
     public Set<Host> getHosts() {
-        return Collections.unmodifiableSet(new HashSet<Host>(hosts));
+        return Collections.unmodifiableSet(new HashSet<Host>(hosts.values()));
     }
 
     public Set<ResourceGroup> getResourceGroups() {
-        return Collections.unmodifiableSet(new HashSet<ResourceGroup>(resourceGroups));
+        return Collections.unmodifiableSet(new HashSet<ResourceGroup>(resourceGroups.values()));
     }
 
     public Set<Computer> getComputers() {
@@ -343,5 +422,10 @@ public class ViDatacenter extends AbstractDatacenter {
 
     void log(Throwable t) {
         // ignore for now;
+    }
+
+    @Override
+    public ViDatacenterId getId() {
+        return (ViDatacenterId) super.getId();
     }
 }

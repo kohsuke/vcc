@@ -142,17 +142,17 @@ public class SmokeTest {
                     new ObjectSpec[]{Helper.newObjectSpec(serviceContent.getRootFolder(), false, folderTraversalSpec)});
 
             Map<String, MOHolder> tree = new HashMap<String, MOHolder>();
-            tree.put(serviceContent.getRootFolder().getValue(), new MOHolder(serviceContent.getRootFolder()));
+            tree.put(serviceContent.getRootFolder().getValue(), new MOHolder(serviceContent.getRootFolder(), "ROOT"));
             Map<String, Collection<MOHolder>> waiting = new HashMap<String, Collection<MOHolder>>();
             for (ObjectContent c : proxy
                     .retrieveProperties(serviceContent.getPropertyCollector(), Arrays.asList(spec))) {
                 if (tree.containsKey(c.getObj().getValue())) {
                     continue;
                 }
-                MOHolder cHolder = new MOHolder(c.getObj());
-                ManagedObjectReference parent = (ManagedObjectReference) getDynamicProperty(c, "resourcePool");
+                MOHolder cHolder = new MOHolder(c.getObj(), (String) Helper.getDynamicProperty(c, "name"));
+                ManagedObjectReference parent = (ManagedObjectReference) Helper.getDynamicProperty(c, "resourcePool");
                 if (parent == null) {
-                    parent = (ManagedObjectReference) getDynamicProperty(c, "parent");
+                    parent = (ManagedObjectReference) Helper.getDynamicProperty(c, "parent");
                 }
                 if (parent != null) {
                     MOHolder parentHolder = tree.get(parent.getValue());
@@ -181,20 +181,13 @@ public class SmokeTest {
         }
     }
 
-    private Object getDynamicProperty(ObjectContent objectContent, String name) {
-        for (DynamicProperty prop : objectContent.getPropSet()) {
-            if (name.equals(prop.getName())) {
-                return prop.getVal();
-            }
-        }
-        return null;
-    }
-
     private static class MOHolder {
         private final ManagedObjectReference mo;
+        private final String name;
         private final Collection<MOHolder> children = new ArrayList<MOHolder>();
 
-        public MOHolder(ManagedObjectReference mo) {
+        public MOHolder(ManagedObjectReference mo, String name) {
+            this.name = name;
             mo.getClass();
             this.mo = mo;
         }
@@ -229,7 +222,9 @@ public class SmokeTest {
             sb.append(mo.getValue());
             sb.append('[');
             sb.append(mo.getType());
-            sb.append("]");
+            sb.append("] \"");
+            sb.append(name);
+            sb.append('\"');
             for (MOHolder child : children) {
                 sb.append(child.toString(indent.replace('-', ' ') + " |--"));
             }

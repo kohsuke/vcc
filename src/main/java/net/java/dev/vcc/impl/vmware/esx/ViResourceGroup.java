@@ -9,22 +9,28 @@ import net.java.dev.vcc.spi.AbstractResourceGroup;
 import net.java.dev.vcc.util.CompletedFuture;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
-public class ViResourceGroup extends AbstractResourceGroup {
+final class ViResourceGroup extends AbstractResourceGroup {
 
     private final ViDatacenter datacenter;
     private ViResourceGroup parent;
-    private final Set<ViHost> hosts = Collections.synchronizedSet(new HashSet<ViHost>());
-    private final Set<ViComputer> computers = Collections.synchronizedSet(new HashSet<ViComputer>());
-    private final Set<ViResourceGroup> resourceGroups = Collections.synchronizedSet(new HashSet<ViResourceGroup>());
+    private String name;
+    private final Map<ViHostId, ViHost> hosts = Collections.synchronizedMap(new HashMap<ViHostId, ViHost>());
+    private final Map<ViComputerId, ViComputer> computers = Collections
+            .synchronizedMap(new HashMap<ViComputerId, ViComputer>());
+    private final Map<ViResourceGroupId, ViResourceGroup> resourceGroups = Collections
+            .synchronizedMap(new HashMap<ViResourceGroupId, ViResourceGroup>());
 
     ViResourceGroup(ViDatacenter datacenter, ManagedObjectId<ResourceGroup> id,
-                    ViResourceGroup parent) {
+                    ViResourceGroup parent, String name) {
         super(id);
         this.datacenter = datacenter;
         this.parent = parent;
+        this.name = name;
     }
 
     public Set<Class<? extends Command>> getCommands() {
@@ -37,18 +43,47 @@ public class ViResourceGroup extends AbstractResourceGroup {
     }
 
     public Set<Host> getHosts() {
-        return Collections.unmodifiableSet(new HashSet<Host>(hosts));
+        return Collections.unmodifiableSet(new HashSet<Host>(hosts.values()));
     }
 
     public Set<ResourceGroup> getResourceGroups() {
-        return Collections.unmodifiableSet(new HashSet<ResourceGroup>(resourceGroups));
+        return Collections.unmodifiableSet(new HashSet<ResourceGroup>(resourceGroups.values()));
     }
 
     public Set<Computer> getComputers() {
-        return Collections.unmodifiableSet(new HashSet<Computer>(computers));
+        return Collections.unmodifiableSet(new HashSet<Computer>(computers.values()));
     }
 
     public String getName() {
-        return "";
+        return this.name;
+    }
+
+    void setName(String name) {
+        this.name = name;
+    }
+
+    void setParent(ViResourceGroup parent) {
+        this.parent = parent;
+    }
+
+    void addComputer(ViComputer viComputer) {
+        computers.put(viComputer.getId(), viComputer);
+    }
+
+    public void addResourceGroup(ViResourceGroup viResourceGroup) {
+        resourceGroups.put(viResourceGroup.getId(), viResourceGroup);
+    }
+
+    void removeComputer(ViComputer viComputer) {
+        computers.remove(viComputer.getId());
+    }
+
+    public void removeResourceGroup(ViResourceGroup viResourceGroup) {
+        resourceGroups.remove(viResourceGroup.getId());
+    }
+
+    @Override
+    public ViResourceGroupId getId() {
+        return (ViResourceGroupId) super.getId();
     }
 }
