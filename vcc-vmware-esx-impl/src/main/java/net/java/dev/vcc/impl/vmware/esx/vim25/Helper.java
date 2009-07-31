@@ -2,6 +2,7 @@ package net.java.dev.vcc.impl.vmware.esx.vim25;
 
 import com.vmware.vim25.DynamicProperty;
 import com.vmware.vim25.ManagedObjectReference;
+import com.vmware.vim25.ObjectContent;
 import com.vmware.vim25.ObjectSpec;
 import com.vmware.vim25.PropertyFilterSpec;
 import com.vmware.vim25.PropertySpec;
@@ -104,5 +105,14 @@ public final class Helper {
             result.put(prop.getName(), prop.getVal());
         }
         return result;
+    }
+
+    public static Object getDynamicProperty(ObjectContent objectContent, String name) {
+        for (DynamicProperty prop : objectContent.getPropSet()) {
+            if (name.equals(prop.getName())) {
+                return prop.getVal();
+            }
+        }
+        return null;
     }
 }

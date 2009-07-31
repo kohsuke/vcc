@@ -2,6 +2,7 @@ package net.java.dev.vcc.impl.vmware.esx.vim;
 
 import com.vmware.vim.DynamicProperty;
 import com.vmware.vim.ManagedObjectReference;
+import com.vmware.vim.ObjectContent;
 import com.vmware.vim.ObjectSpec;
 import com.vmware.vim.PropertyFilterSpec;
 import com.vmware.vim.PropertySpec;
@@ -9,6 +10,9 @@ import com.vmware.vim.SelectionSpec;
 import com.vmware.vim.TraversalSpec;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA. User: connollys Date: Jun 30, 2009 Time: 12:38:05 PM To change this template use File |
@@ -93,5 +97,22 @@ public final class Helper {
         }
         pSpec.getPathSet().addAll(Arrays.asList(pathSets));
         return pSpec;
+    }
+
+    public static Map<String, Object> asMap(List<DynamicProperty> propSet) {
+        Map<String, Object> result = new HashMap<String, Object>();
+        for (DynamicProperty prop : propSet) {
+            result.put(prop.getName(), prop.getVal());
+        }
+        return result;
+    }
+
+    public static Object getDynamicProperty(ObjectContent objectContent, String name) {
+        for (DynamicProperty prop : objectContent.getPropSet()) {
+            if (name.equals(prop.getName())) {
+                return prop.getVal();
+            }
+        }
+        return null;
     }
 }
