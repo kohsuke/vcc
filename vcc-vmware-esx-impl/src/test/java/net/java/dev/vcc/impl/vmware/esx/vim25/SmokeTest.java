@@ -24,7 +24,9 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.*;
 import org.junit.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -89,8 +91,9 @@ public class SmokeTest {
 
             PropertySpec meName = Helper.newPropertySpec("ManagedEntity", false, "name");
 
-            PropertyFilterSpec spec = Helper.newPropertyFilterSpec(meName,
-                    Helper.newObjectSpec(serviceContent.getRootFolder(), false, folderTraversalSpec));
+            PropertyFilterSpec spec = Helper.newPropertyFilterSpec(
+                    new PropertySpec[]{meName, Helper.newPropertySpec("ManagedEntity", false, "parent")},
+                    new ObjectSpec[]{Helper.newObjectSpec(serviceContent.getRootFolder(), false, folderTraversalSpec)});
 
             for (ObjectContent c : proxy
                     .retrieveProperties(serviceContent.getPropertyCollector(), Arrays.asList(spec))) {
@@ -100,6 +103,152 @@ public class SmokeTest {
         } finally {
             proxy.logout(sessionManager);
         }
+    }
+
+    @Test
+    public void buildTree() throws Exception {
+
+        assumeThat(URL, notNullValue()); // need a test environment to run this test
+        assumeThat(URL, is(not(""))); // need a test environment to run this test
+
+        final VimPortType proxy = ConnectionManager.getConnection(URL);
+        final ManagedObjectReference serviceInstance = ConnectionManager.getServiceInstance();
+
+        ServiceContent serviceContent = proxy.retrieveServiceContent(serviceInstance);
+        ManagedObjectReference sessionManager = serviceContent.getSessionManager();
+        UserSession session = proxy.login(sessionManager, USERNAME, PASSWORD, null);
+        try {
+
+            TraversalSpec folderTraversalSpec = Helper
+                    .newTraversalSpec("folderTraversalSpec", "Folder", "childEntity", false,
+                            Helper.newSelectionSpec("folderTraversalSpec"),
+                            Helper.newTraversalSpec("datacenterHostTraversalSpec", "Datacenter", "hostFolder", false,
+                                    Helper.newSelectionSpec("folderTraversalSpec")),
+                            Helper.newTraversalSpec("datacenterVmTraversalSpec", "Datacenter", "vmFolder", false,
+                                    Helper.newSelectionSpec("folderTraversalSpec")),
+                            Helper.newTraversalSpec("computeResourceRpTraversalSpec", "ComputeResource", "resourcePool",
+                                    false,
+                                    Helper.newSelectionSpec("resourcePoolTraversalSpec")),
+                            Helper.newTraversalSpec("computeResourceHostTraversalSpec", "ComputeResource", "host",
+                                    false),
+                            Helper.newTraversalSpec("resourcePoolTraversalSpec", "ResourcePool", "resourcePool", false,
+                                    Helper.newSelectionSpec("resourcePoolTraversalSpec")));
+
+            PropertyFilterSpec spec = Helper.newPropertyFilterSpec(
+                    new PropertySpec[]{Helper.newPropertySpec("ManagedEntity", false, "name"),
+                            Helper.newPropertySpec("ManagedEntity", false, "parent"),
+                            Helper.newPropertySpec("VirtualMachine", false, "resourcePool"),
+                    },
+                    new ObjectSpec[]{Helper.newObjectSpec(serviceContent.getRootFolder(), false, folderTraversalSpec)});
+
+            Map<String, MOHolder> tree = new HashMap<String, MOHolder>();
+            tree.put(serviceContent.getRootFolder().getValue(), new MOHolder(serviceContent.getRootFolder()));
+            Map<String, Collection<MOHolder>> waiting = new HashMap<String, Collection<MOHolder>>();
+            for (ObjectContent c : proxy
+                    .retrieveProperties(serviceContent.getPropertyCollector(), Arrays.asList(spec))) {
+                if (tree.containsKey(c.getObj().getValue())) {
+                    continue;
+                }
+                MOHolder cHolder = new MOHolder(c.getObj());
+                ManagedObjectReference parent = (ManagedObjectReference) getDynamicProperty(c, "resourcePool");
+                if (parent == null) {
+                    parent = (ManagedObjectReference) getDynamicProperty(c, "parent");
+                }
+                if (parent != null) {
+                    MOHolder parentHolder = tree.get(parent.getValue());
+                    if (parentHolder != null) {
+                        parentHolder.getChildren().add(cHolder);
+                    } else {
+                        Collection<MOHolder> _waiting = waiting.get(parent.getValue());
+                        if (_waiting == null) {
+                            waiting.put(parent.getValue(), _waiting = new ArrayList<MOHolder>());
+                        }
+                        _waiting.add(cHolder);
+                    }
+                }
+                Collection<MOHolder> _waiting = waiting.get(c.getObj().getValue());
+                if (_waiting != null) {
+                    cHolder.getChildren().addAll(_waiting);
+                    waiting.remove(c.getObj().getValue());
+                }
+                tree.put(c.getObj().getValue(), cHolder);
+
+            }
+            System.out.println(tree.get(serviceContent.getRootFolder().getValue()));
+
+        } finally {
+            proxy.logout(sessionManager);
+        }
+    }
+
+    private Object getDynamicProperty(ObjectContent objectContent, String name) {
+        for (DynamicProperty prop : objectContent.getPropSet()) {
+            if (name.equals(prop.getName())) {
+                return prop.getVal();
+            }
+        }
+        return null;
+    }
+
+    private static class MOHolder {
+        private final ManagedObjectReference mo;
+        private final Collection<MOHolder> children = new ArrayList<MOHolder>();
+
+        public MOHolder(ManagedObjectReference mo) {
+            mo.getClass();
+            this.mo = mo;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            MOHolder moHolder = (MOHolder) o;
+
+            if (!mo.equals(moHolder.mo)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return toString("");
+        }
+
+        public String toString(String indent) {
+            final StringBuilder sb = new StringBuilder();
+            sb.append('\n');
+            sb.append(indent);
+            sb.append(mo.getValue());
+            sb.append('[');
+            sb.append(mo.getType());
+            sb.append("]");
+            for (MOHolder child : children) {
+                sb.append(child.toString(indent.replace('-', ' ') + " |--"));
+            }
+            return sb.toString();
+        }
+
+        @Override
+        public int hashCode() {
+            return mo.hashCode();
+        }
+
+        public ManagedObjectReference getMo() {
+            return mo;
+        }
+
+        public Collection<MOHolder> getChildren() {
+            return children;
+        }
+
     }
 
     @Test
