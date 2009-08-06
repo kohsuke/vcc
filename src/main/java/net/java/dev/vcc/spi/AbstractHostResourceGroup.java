@@ -1,7 +1,6 @@
 package net.java.dev.vcc.spi;
 
 import net.java.dev.vcc.api.Computer;
-import net.java.dev.vcc.api.Host;
 import net.java.dev.vcc.api.HostResourceGroup;
 import net.java.dev.vcc.api.ManagedObjectId;
 
@@ -10,23 +9,28 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by IntelliJ IDEA. User: user Date: 30-Apr-2009 Time: 17:40:33 To change this template use File | Settings |
- * File Templates.
+ * The base class from which all Service Provider Implementations map a resource group from.
  */
-public abstract class AbstractHost
-    extends AbstractManagedObject<Host>
-    implements Host
+public abstract class AbstractHostResourceGroup
+    extends AbstractManagedObject<HostResourceGroup>
+    implements HostResourceGroup
 {
-    protected AbstractHost( ManagedObjectId<Host> id )
+    protected AbstractHostResourceGroup( ManagedObjectId<HostResourceGroup> resourceGroupManagedObjectId )
     {
-        super( id );
+        super( resourceGroupManagedObjectId );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Set<Computer> getComputers()
     {
         return Collections.emptySet();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Set<HostResourceGroup> getHostResourceGroups()
     {
         return Collections.emptySet();
