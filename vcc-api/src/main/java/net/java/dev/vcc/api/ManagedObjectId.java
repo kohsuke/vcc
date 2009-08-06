@@ -1,6 +1,8 @@
 package net.java.dev.vcc.api;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * The unique ID of a {@link net.java.dev.vcc.api.ManagedObject} instance.
@@ -84,6 +86,14 @@ public abstract class ManagedObjectId<T extends ManagedObject> implements Serial
 
     @Override
     public String toString() {
-        return datacenterUrl + ";class=" + managedObjectClass;
+        final StringBuilder sb = new StringBuilder();
+        sb.append(datacenterUrl);
+        try {
+            sb.append(";class=");
+            sb.append(URLEncoder.encode(managedObjectClass.getSimpleName(), "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            // ignore, this cannot happen
+        }
+        return sb.toString();
     }
 }
