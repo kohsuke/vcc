@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamField;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * Created by IntelliJ IDEA. User: connollys Date: Jul 31, 2009 Time: 12:16:57 PM To change this template use File |
@@ -76,5 +78,19 @@ class ViManagedObjectId<T extends ManagedObject> extends ManagedObjectId<T> {
         int result = super.hashCode();
         result = 31 * result + moRef.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(super.toString());
+        try {
+            sb.append(";type=");
+            sb.append(URLEncoder.encode(moRef.getType(), "UTF-8"));
+            sb.append(";value=");
+            sb.append(URLEncoder.encode(moRef.getValue(), "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            // ignore, this cannot happen
+        }
+        return sb.toString();
     }
 }
