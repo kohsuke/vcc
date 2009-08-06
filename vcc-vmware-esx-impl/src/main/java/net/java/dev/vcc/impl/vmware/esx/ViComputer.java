@@ -13,78 +13,98 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-final class ViComputer extends AbstractComputer {
+final class ViComputer
+    extends AbstractComputer
+{
 
     private final ViDatacenter datacenter;
-    private ViResourceGroup parent;
+
+    private ViDatacenterResourceGroup parent;
+
     private String name;
 
-    ViComputer(ViDatacenter datacenter, ManagedObjectId<Computer> id, ViResourceGroup parent, String name) {
-        super(id);
+    ViComputer( ViDatacenter datacenter, ManagedObjectId<Computer> id, ViDatacenterResourceGroup parent, String name )
+    {
+        super( id );
         this.datacenter = datacenter;
         this.parent = parent;
         this.name = name;
     }
 
-    public Set<Class<? extends Command>> getCommands() {
+    public Set<Class<? extends Command>> getCommands()
+    {
         return Collections.emptySet(); // TODO get commands
     }
 
-    public <T extends Command> T execute(T command) {
-        command.setSubmitted(new CompletedFuture("Unsupported command", new UnsupportedOperationException()));
+    public <T extends Command> T execute( T command )
+    {
+        command.setSubmitted( new CompletedFuture( "Unsupported command", new UnsupportedOperationException() ) );
         return command;
     }
 
-    public Host getHost() {
+    public Host getHost()
+    {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public boolean isHostChanging() {
+    public boolean isHostChanging()
+    {
         return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public Future<Host> getFutureHost() {
+    public Future<Host> getFutureHost()
+    {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public PowerState getState() {
+    public PowerState getState()
+    {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public boolean isStateChanging() {
+    public boolean isStateChanging()
+    {
         return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public Future<PowerState> getFutureState() {
+    public Future<PowerState> getFutureState()
+    {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public Set<ComputerSnapshot> getSnapshots() {
+    public Set<ComputerSnapshot> getSnapshots()
+    {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public Set<Host> getAllowedHosts() {
+    public Set<Host> getAllowedHosts()
+    {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
-    public String getDescription() {
+    public String getDescription()
+    {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public ViComputerId getId() {
+    public ViComputerId getId()
+    {
         return (ViComputerId) super.getId();
     }
 
-    void setParent(ViResourceGroup parent) {
+    void setParent( ViDatacenterResourceGroup parent )
+    {
         this.parent = parent;
     }
 
-    void setName(String name) {
+    void setName( String name )
+    {
         this.name = name;
     }
 }

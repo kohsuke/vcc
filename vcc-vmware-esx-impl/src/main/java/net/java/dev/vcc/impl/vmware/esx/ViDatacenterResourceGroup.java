@@ -5,7 +5,7 @@ import net.java.dev.vcc.api.Computer;
 import net.java.dev.vcc.api.DatacenterResourceGroup;
 import net.java.dev.vcc.api.Host;
 import net.java.dev.vcc.api.ManagedObjectId;
-import net.java.dev.vcc.spi.AbstractHost;
+import net.java.dev.vcc.spi.AbstractDatacenterResourceGroup;
 import net.java.dev.vcc.util.CompletedFuture;
 
 import java.util.Collections;
@@ -14,15 +14,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-final class ViHost
-    extends AbstractHost
+final class ViDatacenterResourceGroup
+    extends AbstractDatacenterResourceGroup
 {
 
     private final ViDatacenter datacenter;
 
+    private ViDatacenterResourceGroup parent;
+
     private String name;
 
-    private ViDatacenterResourceGroup parent;
+    private final Map<ViHostId, ViHost> hosts = Collections.synchronizedMap( new HashMap<ViHostId, ViHost>() );
 
     private final Map<ViComputerId, ViComputer> computers =
         Collections.synchronizedMap( new HashMap<ViComputerId, ViComputer>() );
@@ -30,7 +32,8 @@ final class ViHost
     private final Map<ViResourceGroupId, ViDatacenterResourceGroup> resourceGroups =
         Collections.synchronizedMap( new HashMap<ViResourceGroupId, ViDatacenterResourceGroup>() );
 
-    ViHost( ViDatacenter datacenter, ManagedObjectId<Host> id, ViDatacenterResourceGroup parent, String name )
+    ViDatacenterResourceGroup( ViDatacenter datacenter, ManagedObjectId<DatacenterResourceGroup> id,
+                               ViDatacenterResourceGroup parent, String name )
     {
         super( id );
         this.datacenter = datacenter;
@@ -49,6 +52,11 @@ final class ViHost
         return command;
     }
 
+    public Set<Host> getHosts()
+    {
+        return Collections.unmodifiableSet( new HashSet<Host>( hosts.values() ) );
+    }
+
     public Set<DatacenterResourceGroup> getDatacenterResourceGroups()
     {
         return Collections.unmodifiableSet( new HashSet<DatacenterResourceGroup>( resourceGroups.values() ) );
@@ -61,7 +69,7 @@ final class ViHost
 
     public String getName()
     {
-        return name;
+        return this.name;
     }
 
     void setName( String name )
@@ -77,6 +85,16 @@ final class ViHost
     void addComputer( ViComputer viComputer )
     {
         computers.put( viComputer.getId(), viComputer );
+    }
+
+    void addHost( ViHost viHost )
+    {
+        hosts.put( viHost.getId(), viHost );
+    }
+
+    void removeHost( ViHost viHost )
+    {
+        hosts.remove( viHost.getId() );
     }
 
     public void addResourceGroup( ViDatacenterResourceGroup viResourceGroup )
@@ -95,8 +113,8 @@ final class ViHost
     }
 
     @Override
-    public ViHostId getId()
+    public ViResourceGroupId getId()
     {
-        return (ViHostId) super.getId();
+        return (ViResourceGroupId) super.getId();
     }
 }
