@@ -5,8 +5,7 @@ import java.util.Set;
 /**
  * Marker interface for a container of datacenter resources.
  */
-interface DatacenterResourceContainer
-{
+interface DatacenterResourceContainer {
     /**
      * Gets all the hosts available for running virtual computers that are contained in this container.
      *

@@ -5,8 +5,7 @@ package net.java.dev.vcc.api;
  * File Templates.
  */
 public interface Host
-    extends ManagedObject<Host>, HostResourceContainer
-{
+        extends ManagedObject<Host>, HostResourceContainer {
 
     String getName();
 

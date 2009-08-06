@@ -8,8 +8,7 @@ import java.util.Set;
  * @author Stephen Connolly
  */
 public interface Datacenter
-    extends ManagedObject<Datacenter>, CapabilityProfile, DatacenterResourceContainer
-{
+        extends ManagedObject<Datacenter>, CapabilityProfile, DatacenterResourceContainer {
 
     /**
      * Gets all the power states that are supported by this connection.
@@ -24,7 +23,7 @@ public interface Datacenter
      * @param from the power state to transition from.
      * @return the power states that a computer can be transitioned to.
      */
-    Set<PowerState> getAllowedStates( PowerState from );
+    Set<PowerState> getAllowedStates(PowerState from);
 
     /**
      * Closes the connection releasing any handles.

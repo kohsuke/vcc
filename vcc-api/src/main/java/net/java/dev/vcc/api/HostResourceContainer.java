@@ -5,8 +5,7 @@ import java.util.Set;
 /**
  * Marker interface for a container of host resources.
  */
-interface HostResourceContainer
-{
+interface HostResourceContainer {
     /**
      * Gets all the virtual computers that are contained in this container.
      *
