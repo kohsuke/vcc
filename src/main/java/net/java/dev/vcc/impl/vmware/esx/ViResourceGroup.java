@@ -70,6 +70,14 @@ final class ViResourceGroup extends AbstractResourceGroup {
         computers.put(viComputer.getId(), viComputer);
     }
 
+    void addHost(ViHost viHost) {
+        hosts.put(viHost.getId(), viHost);
+    }
+
+    void removeHost(ViHost viHost) {
+        hosts.remove(viHost.getId());
+    }
+
     public void addResourceGroup(ViResourceGroup viResourceGroup) {
         resourceGroups.put(viResourceGroup.getId(), viResourceGroup);
     }

@@ -165,6 +165,8 @@ final class ViDatacenter extends AbstractDatacenter {
         } else if (parentMO instanceof ViResourceGroup) {
             if (childMO instanceof ViComputer) {
                 ((ViResourceGroup) parentMO).addComputer((ViComputer) childMO);
+            } else if (childMO instanceof ViHost) {
+                ((ViResourceGroup) parentMO).addHost((ViHost) childMO);
             } else if (childMO instanceof ViResourceGroup) {
                 ((ViResourceGroup) parentMO).addResourceGroup((ViResourceGroup) childMO);
             }
