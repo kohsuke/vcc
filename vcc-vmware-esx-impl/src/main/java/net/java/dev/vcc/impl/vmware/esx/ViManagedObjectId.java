@@ -49,4 +49,32 @@ class ViManagedObjectId<T extends ManagedObject> extends ManagedObjectId<T> {
         moRef.setType((String) fields.get("type", null));
         moRef.setValue((String) fields.get("value", null));
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ViManagedObjectId)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+
+        ViManagedObjectId that = (ViManagedObjectId) o;
+
+        if (!moRef.equals(that.moRef)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + moRef.hashCode();
+        return result;
+    }
 }
