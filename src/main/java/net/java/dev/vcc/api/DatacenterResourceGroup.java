@@ -6,7 +6,6 @@ package net.java.dev.vcc.api;
  * @author Stephen Connolly
  */
 public interface DatacenterResourceGroup
-    extends ManagedObject<DatacenterResourceGroup>, DatacenterResourceContainer
-{
+        extends ManagedObject<DatacenterResourceGroup>, DatacenterResourceContainer {
 
 }

@@ -28,6 +28,7 @@ public final class Success implements Serializable {
 
     /**
      * Returns the Success singleton.
+     *
      * @return the Success singleton.
      */
     public static Success getInstance() {
@@ -47,6 +48,7 @@ public final class Success implements Serializable {
 
     /**
      * Ensure that we only ever have one instance.
+     *
      * @return The singleton instance.
      * @throws ObjectStreamException if it sees any self-propelled airborne ham or pork.
      */

@@ -6,8 +6,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Represents an operation to be performed. All instances of this class must comply with the JavaBeans specification 
- * with the following modification: Setters will throw an {@link IllegalStateException} if the command has been 
+ * Represents an operation to be performed. All instances of this class must comply with the JavaBeans specification
+ * with the following modification: Setters will throw an {@link IllegalStateException} if the command has been
  * submitted, i.e. a setFoo method would look like this<pre>
  * public void setFoo(Foo foo) {
  *     checkNotSubmitted();
@@ -15,7 +15,7 @@ import java.util.concurrent.TimeoutException;
  * }
  * </pre>
  * <p/>
- * When a {@link Command} subclass is being extended, any new parameters should have 
+ * When a {@link Command} subclass is being extended, any new parameters should have
  * default values which ensure that older clients which are unaware of the new parameters will still achieve the same
  * behaviour.
  *
@@ -64,6 +64,7 @@ public abstract class Command<RESULT> implements Future<RESULT> {
 
     /**
      * This method is called by an SPI when the command has been submitted.
+     *
      * @param delegate The future representing the command.
      */
     public final void setSubmitted(Future<RESULT> delegate) {
@@ -86,6 +87,7 @@ public abstract class Command<RESULT> implements Future<RESULT> {
 
     /**
      * Returns {@code true} if the command has been submitted.
+     *
      * @return {@code true} if the command has been submitted.
      */
     public final boolean isSubmitted() {

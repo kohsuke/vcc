@@ -1,7 +1,5 @@
 package net.java.dev.vcc.util;
 
-import net.java.dev.vcc.spi.DatacenterConnection;
-
 import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -14,9 +12,9 @@ import java.util.WeakHashMap;
  * To change this template use File | Settings | File Templates.
  */
 public final class ServiceLoaderCache<T> {
-    
+
     private final Class<T> serviceClass;
-    
+
     /**
      * A weak cache of service loader proxies that should allow unloading without a permgen leak (I hope).
      * Guarded by itself.
@@ -50,7 +48,5 @@ public final class ServiceLoaderCache<T> {
         }
     }
 
-    
 
-    
 }

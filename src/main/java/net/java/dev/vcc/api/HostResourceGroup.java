@@ -6,7 +6,6 @@ package net.java.dev.vcc.api;
  * @author Stephen Connolly
  */
 public interface HostResourceGroup
-    extends ManagedObject<HostResourceGroup>, HostResourceContainer
-{
+        extends ManagedObject<HostResourceGroup>, HostResourceContainer {
 
 }

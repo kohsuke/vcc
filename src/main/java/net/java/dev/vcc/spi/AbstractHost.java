@@ -14,33 +14,27 @@ import java.util.Set;
  * File Templates.
  */
 public abstract class AbstractHost
-    extends AbstractManagedObject<Host>
-    implements Host
-{
-    protected AbstractHost( ManagedObjectId<Host> id )
-    {
-        super( id );
+        extends AbstractManagedObject<Host>
+        implements Host {
+    protected AbstractHost(ManagedObjectId<Host> id) {
+        super(id);
     }
 
-    public Set<Computer> getComputers()
-    {
+    public Set<Computer> getComputers() {
         return Collections.emptySet();
     }
 
-    public Set<HostResourceGroup> getHostResourceGroups()
-    {
+    public Set<HostResourceGroup> getHostResourceGroups() {
         return Collections.emptySet();
     }
 
     /**
      * {@inheritDoc}
      */
-    public Set<HostResourceGroup> getAllHostResourceGroups()
-    {
-        Set<HostResourceGroup> result = new HashSet<HostResourceGroup>( getHostResourceGroups() );
-        for ( HostResourceGroup group : getHostResourceGroups() )
-        {
-            result.addAll( group.getAllHostResourceGroups() );
+    public Set<HostResourceGroup> getAllHostResourceGroups() {
+        Set<HostResourceGroup> result = new HashSet<HostResourceGroup>(getHostResourceGroups());
+        for (HostResourceGroup group : getHostResourceGroups()) {
+            result.addAll(group.getAllHostResourceGroups());
         }
         return result;
     }
@@ -48,12 +42,10 @@ public abstract class AbstractHost
     /**
      * {@inheritDoc}
      */
-    public Set<Computer> getAllComputers()
-    {
-        Set<Computer> result = new HashSet<Computer>( getComputers() );
-        for ( HostResourceGroup group : getHostResourceGroups() )
-        {
-            result.addAll( group.getAllComputers() );
+    public Set<Computer> getAllComputers() {
+        Set<Computer> result = new HashSet<Computer>(getComputers());
+        for (HostResourceGroup group : getHostResourceGroups()) {
+            result.addAll(group.getAllComputers());
         }
         return result;
     }
