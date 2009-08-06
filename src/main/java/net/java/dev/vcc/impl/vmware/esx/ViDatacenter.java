@@ -14,9 +14,9 @@ import com.vmware.vim25.RuntimeFaultFaultMsg;
 import com.vmware.vim25.TraversalSpec;
 import net.java.dev.vcc.api.Command;
 import net.java.dev.vcc.api.Computer;
+import net.java.dev.vcc.api.DatacenterResourceGroup;
 import net.java.dev.vcc.api.Host;
 import net.java.dev.vcc.api.PowerState;
-import net.java.dev.vcc.api.ResourceGroup;
 import net.java.dev.vcc.api.profiles.BasicProfile;
 import net.java.dev.vcc.impl.vmware.esx.vim25.Helper;
 import net.java.dev.vcc.spi.AbstractDatacenter;
@@ -50,384 +50,529 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * A VMware ESX Datacenter.
  */
-final class ViDatacenter extends AbstractDatacenter {
+final class ViDatacenter
+    extends AbstractDatacenter
+{
 
     private final TaskController taskController = new ViTaskController();
+
     private final Lock connectionLock = new ReentrantLock();
+
     private boolean connectionClosing = false;
+
     private final Condition closingCondition = connectionLock.newCondition();
+
     private final Condition closedCondition = connectionLock.newCondition();
+
     private ViConnection connection;
-    private ExecutorService connectionExecutor = Executors.newCachedThreadPool(new ViThreadFactory());
-    private final Map<ViHostId, ViHost> hosts = Collections.synchronizedMap(new HashMap<ViHostId, ViHost>());
-    private final Map<ViResourceGroupId, ViResourceGroup> resourceGroups = Collections
-            .synchronizedMap(new HashMap<ViResourceGroupId, ViResourceGroup>());
+
+    private ExecutorService connectionExecutor = Executors.newCachedThreadPool( new ViThreadFactory() );
+
+    private final Map<ViHostId, ViHost> hosts = Collections.synchronizedMap( new HashMap<ViHostId, ViHost>() );
+
+    private final Map<ViResourceGroupId, ViDatacenterResourceGroup> resourceGroups =
+        Collections.synchronizedMap( new HashMap<ViResourceGroupId, ViDatacenterResourceGroup>() );
+
     private ViDatacenter.ViEventCollector eventCollector;
+
     private ManagedObjectReference rootFolder;
 
-    ViDatacenter(ViDatacenterId id, ViConnection connection)
-            throws RuntimeFaultFaultMsg, InvalidStateFaultMsg, InvalidPropertyFaultMsg {
-        super(id, BasicProfile.getInstance()); // TODO get capabilities
+    ViDatacenter( ViDatacenterId id, ViConnection connection )
+        throws RuntimeFaultFaultMsg, InvalidStateFaultMsg, InvalidPropertyFaultMsg
+    {
+        super( id, BasicProfile.getInstance() ); // TODO get capabilities
         this.connection = connection;
 
         // 1. start collecting events
         eventCollector = new ViEventCollector();
-        connectionExecutor.submit(new DefaultPollingTask(taskController, eventCollector, 1, TimeUnit.SECONDS));
+        connectionExecutor.submit( new DefaultPollingTask( taskController, eventCollector, 1, TimeUnit.SECONDS ) );
 
         // 2. find what's out there
-        TraversalSpec folderTraversalSpec = Helper
-                .newTraversalSpec("folderTraversalSpec", "Folder", "childEntity", false,
-                        Helper.newSelectionSpec("folderTraversalSpec"),
-                        Helper.newTraversalSpec("datacenterHostTraversalSpec", "Datacenter", "hostFolder", false,
-                                Helper.newSelectionSpec("folderTraversalSpec")),
-                        Helper.newTraversalSpec("datacenterVmTraversalSpec", "Datacenter", "vmFolder", false,
-                                Helper.newSelectionSpec("folderTraversalSpec")),
-                        Helper.newTraversalSpec("computeResourceRpTraversalSpec", "ComputeResource", "resourcePool",
-                                false,
-                                Helper.newSelectionSpec("resourcePoolTraversalSpec")),
-                        Helper.newTraversalSpec("computeResourceHostTraversalSpec", "ComputeResource", "host",
-                                false),
-                        Helper.newTraversalSpec("resourcePoolTraversalSpec", "ResourcePool", "resourcePool", false,
-                                Helper.newSelectionSpec("resourcePoolTraversalSpec")));
+        TraversalSpec folderTraversalSpec =
+            Helper.newTraversalSpec( "folderTraversalSpec", "Folder", "childEntity", false,
+                                     Helper.newSelectionSpec( "folderTraversalSpec" ),
+                                     Helper.newTraversalSpec( "datacenterHostTraversalSpec", "Datacenter", "hostFolder",
+                                                              false, Helper.newSelectionSpec( "folderTraversalSpec" ) ),
+                                     Helper.newTraversalSpec( "datacenterVmTraversalSpec", "Datacenter", "vmFolder",
+                                                              false, Helper.newSelectionSpec( "folderTraversalSpec" ) ),
+                                     Helper.newTraversalSpec( "computeResourceRpTraversalSpec", "ComputeResource",
+                                                              "resourcePool", false,
+                                                              Helper.newSelectionSpec( "resourcePoolTraversalSpec" ) ),
+                                     Helper.newTraversalSpec( "computeResourceHostTraversalSpec", "ComputeResource",
+                                                              "host", false ),
+                                     Helper.newTraversalSpec( "resourcePoolTraversalSpec", "ResourcePool",
+                                                              "resourcePool", false, Helper.newSelectionSpec(
+                                             "resourcePoolTraversalSpec" ) ) );
 
         rootFolder = connection.getServiceContent().getRootFolder();
         PropertyFilterSpec spec = Helper.newPropertyFilterSpec(
-                new PropertySpec[]{Helper.newPropertySpec("ManagedEntity", false, "name"),
-                        Helper.newPropertySpec("ManagedEntity", false, "parent"),
-                        Helper.newPropertySpec("VirtualMachine", false, "resourcePool"),
-                },
-                new ObjectSpec[]{Helper.newObjectSpec(rootFolder, false, folderTraversalSpec)});
+            new PropertySpec[]{Helper.newPropertySpec( "ManagedEntity", false, "name" ),
+                Helper.newPropertySpec( "ManagedEntity", false, "parent" ),
+                Helper.newPropertySpec( "VirtualMachine", false, "resourcePool" ),},
+            new ObjectSpec[]{Helper.newObjectSpec( rootFolder, false, folderTraversalSpec )} );
 
         Map<String, AbstractManagedObject> model = new HashMap<String, AbstractManagedObject>();
-        model.put(rootFolder.getValue(), this);
-        Map<String, Collection<AbstractManagedObject>> waiting
-                = new HashMap<String, Collection<AbstractManagedObject>>();
-        List<ObjectContent> entities = connection.getProxy()
-                .retrieveProperties(connection.getServiceContent().getPropertyCollector(),
-                        Collections.singletonList(spec));
-        for (ObjectContent entity : entities) {
+        model.put( rootFolder.getValue(), this );
+        Map<String, Collection<AbstractManagedObject>> waiting =
+            new HashMap<String, Collection<AbstractManagedObject>>();
+        List<ObjectContent> entities =
+            connection.getProxy().retrieveProperties( connection.getServiceContent().getPropertyCollector(),
+                                                      Collections.singletonList( spec ) );
+        for ( ObjectContent entity : entities )
+        {
             ManagedObjectReference entityObject = entity.getObj();
-            if (model.containsKey(entityObject.getValue())) {
+            if ( model.containsKey( entityObject.getValue() ) )
+            {
                 continue;
             }
             AbstractManagedObject entityMO;
             String entityType = entityObject.getType();
-            String entityName = (String) Helper.getDynamicProperty(entity, "name");
-            if ("VirtualMachine".equals(entityType)) {
-                entityMO = new ViComputer(this, new ViComputerId(getId(), entityObject), null, entityName);
-            } else if ("ComputeResource".equals(entityType)) {
-                entityMO = new ViHost(this, new ViHostId(getId(), entityObject), null, entityName);
-            } else if ("ResourcePool".equals(entityType)) {
-                entityMO = new ViResourceGroup(this, new ViResourceGroupId(getId(), entityObject), null, entityName);
-            } else if ("Folder".equals(entityType)) {
-                entityMO = new ViResourceGroup(this, new ViResourceGroupId(getId(), entityObject), null, entityName);
-            } else if ("Datacenter".equals(entityType)) {
-                entityMO = new ViResourceGroup(this, new ViResourceGroupId(getId(), entityObject), null, entityName);
-            } else {
+            String entityName = (String) Helper.getDynamicProperty( entity, "name" );
+            if ( "VirtualMachine".equals( entityType ) )
+            {
+                entityMO = new ViComputer( this, new ViComputerId( getId(), entityObject ), null, entityName );
+            }
+            else if ( "ComputeResource".equals( entityType ) )
+            {
+                entityMO = new ViHost( this, new ViHostId( getId(), entityObject ), null, entityName );
+            }
+            else if ( "ResourcePool".equals( entityType ) )
+            {
+                entityMO = new ViDatacenterResourceGroup( this, new ViResourceGroupId( getId(), entityObject ), null,
+                                                          entityName );
+            }
+            else if ( "Folder".equals( entityType ) )
+            {
+                entityMO = new ViDatacenterResourceGroup( this, new ViResourceGroupId( getId(), entityObject ), null,
+                                                          entityName );
+            }
+            else if ( "Datacenter".equals( entityType ) )
+            {
+                entityMO = new ViDatacenterResourceGroup( this, new ViResourceGroupId( getId(), entityObject ), null,
+                                                          entityName );
+            }
+            else
+            {
                 // unknown object type
                 continue;
             }
-            ManagedObjectReference parent = (ManagedObjectReference) Helper.getDynamicProperty(entity, "resourcePool");
-            if (parent == null) {
-                parent = (ManagedObjectReference) Helper.getDynamicProperty(entity, "parent");
+            ManagedObjectReference parent =
+                (ManagedObjectReference) Helper.getDynamicProperty( entity, "resourcePool" );
+            if ( parent == null )
+            {
+                parent = (ManagedObjectReference) Helper.getDynamicProperty( entity, "parent" );
             }
-            if (parent != null) {
-                AbstractManagedObject parentMO = model.get(parent.getValue());
-                if (parentMO != null) {
-                    addChildMO(parentMO, entityMO);
-                } else {
-                    Collection<AbstractManagedObject> pendingChildMOs = waiting.get(parent.getValue());
-                    if (pendingChildMOs == null) {
-                        waiting.put(parent.getValue(), pendingChildMOs = new ArrayList<AbstractManagedObject>());
+            if ( parent != null )
+            {
+                AbstractManagedObject parentMO = model.get( parent.getValue() );
+                if ( parentMO != null )
+                {
+                    addChildMO( parentMO, entityMO );
+                }
+                else
+                {
+                    Collection<AbstractManagedObject> pendingChildMOs = waiting.get( parent.getValue() );
+                    if ( pendingChildMOs == null )
+                    {
+                        waiting.put( parent.getValue(), pendingChildMOs = new ArrayList<AbstractManagedObject>() );
                     }
-                    pendingChildMOs.add(entityMO);
+                    pendingChildMOs.add( entityMO );
                 }
             }
-            Collection<AbstractManagedObject> _waiting = waiting.get(entityObject.getValue());
-            if (_waiting != null) {
-                for (AbstractManagedObject childMO : _waiting) {
-                    addChildMO(entityMO, childMO);
+            Collection<AbstractManagedObject> _waiting = waiting.get( entityObject.getValue() );
+            if ( _waiting != null )
+            {
+                for ( AbstractManagedObject childMO : _waiting )
+                {
+                    addChildMO( entityMO, childMO );
                 }
-                waiting.remove(entityObject.getValue());
+                waiting.remove( entityObject.getValue() );
             }
-            model.put(entityObject.getValue(), entityMO);
+            model.put( entityObject.getValue(), entityMO );
         }
         // 3. start dispatching events
     }
 
-    private void addChildMO(AbstractManagedObject parentMO, AbstractManagedObject childMO) {
-        if (parentMO instanceof ViHost) {
-            if (childMO instanceof ViComputer) {
-                ((ViHost) parentMO).addComputer((ViComputer) childMO);
-            } else if (childMO instanceof ViResourceGroup) {
-                ((ViHost) parentMO).addResourceGroup((ViResourceGroup) childMO);
+    private void addChildMO( AbstractManagedObject parentMO, AbstractManagedObject childMO )
+    {
+        if ( parentMO instanceof ViHost )
+        {
+            if ( childMO instanceof ViComputer )
+            {
+                ( (ViHost) parentMO ).addComputer( (ViComputer) childMO );
             }
-        } else if (parentMO instanceof ViResourceGroup) {
-            if (childMO instanceof ViComputer) {
-                ((ViResourceGroup) parentMO).addComputer((ViComputer) childMO);
-            } else if (childMO instanceof ViHost) {
-                ((ViResourceGroup) parentMO).addHost((ViHost) childMO);
-            } else if (childMO instanceof ViResourceGroup) {
-                ((ViResourceGroup) parentMO).addResourceGroup((ViResourceGroup) childMO);
+            else if ( childMO instanceof ViDatacenterResourceGroup )
+            {
+                ( (ViHost) parentMO ).addResourceGroup( (ViDatacenterResourceGroup) childMO );
             }
-        } else if (parentMO instanceof ViDatacenter) {
-            if (childMO instanceof ViResourceGroup) {
-                ((ViDatacenter) parentMO).addResourceGroup((ViResourceGroup) childMO);
-            } else if (childMO instanceof ViHost) {
-                ((ViDatacenter) parentMO).addHost((ViHost) childMO);
+        }
+        else if ( parentMO instanceof ViDatacenterResourceGroup )
+        {
+            if ( childMO instanceof ViComputer )
+            {
+                ( (ViDatacenterResourceGroup) parentMO ).addComputer( (ViComputer) childMO );
+            }
+            else if ( childMO instanceof ViHost )
+            {
+                ( (ViDatacenterResourceGroup) parentMO ).addHost( (ViHost) childMO );
+            }
+            else if ( childMO instanceof ViDatacenterResourceGroup )
+            {
+                ( (ViDatacenterResourceGroup) parentMO ).addResourceGroup( (ViDatacenterResourceGroup) childMO );
+            }
+        }
+        else if ( parentMO instanceof ViDatacenter )
+        {
+            if ( childMO instanceof ViDatacenterResourceGroup )
+            {
+                ( (ViDatacenter) parentMO ).addResourceGroup( (ViDatacenterResourceGroup) childMO );
+            }
+            else if ( childMO instanceof ViHost )
+            {
+                ( (ViDatacenter) parentMO ).addHost( (ViHost) childMO );
             }
         }
     }
 
-    void addHost(ViHost viHost) {
-        hosts.put(viHost.getId(), viHost);
+    void addHost( ViHost viHost )
+    {
+        hosts.put( viHost.getId(), viHost );
     }
 
-    void removeHost(ViHost viHost) {
-        hosts.remove(viHost.getId());
+    void removeHost( ViHost viHost )
+    {
+        hosts.remove( viHost.getId() );
     }
 
-    public void addResourceGroup(ViResourceGroup viResourceGroup) {
-        resourceGroups.put(viResourceGroup.getId(), viResourceGroup);
+    public void addResourceGroup( ViDatacenterResourceGroup viResourceGroup )
+    {
+        resourceGroups.put( viResourceGroup.getId(), viResourceGroup );
     }
 
-    public void removeResourceGroup(ViResourceGroup viResourceGroup) {
-        resourceGroups.remove(viResourceGroup.getId());
+    public void removeResourceGroup( ViDatacenterResourceGroup viResourceGroup )
+    {
+        resourceGroups.remove( viResourceGroup.getId() );
     }
 
-    public Set<Class<? extends Command>> getCommands() {
+    public Set<Class<? extends Command>> getCommands()
+    {
         return Collections.emptySet(); // TODO get commands
     }
 
-    public <T extends Command> T execute(T command) {
-        command.setSubmitted(new CompletedFuture("Unsupported command", new UnsupportedOperationException()));
+    public <T extends Command> T execute( T command )
+    {
+        command.setSubmitted( new CompletedFuture( "Unsupported command", new UnsupportedOperationException() ) );
         return command;
     }
 
-    public Set<Host> getHosts() {
-        return Collections.unmodifiableSet(new HashSet<Host>(hosts.values()));
+    public Set<Host> getHosts()
+    {
+        return Collections.unmodifiableSet( new HashSet<Host>( hosts.values() ) );
     }
 
-    public Set<ResourceGroup> getResourceGroups() {
-        return Collections.unmodifiableSet(new HashSet<ResourceGroup>(resourceGroups.values()));
+    public Set<DatacenterResourceGroup> getDatacenterResourceGroups()
+    {
+        return Collections.unmodifiableSet( new HashSet<DatacenterResourceGroup>( resourceGroups.values() ) );
     }
 
-    public Set<Computer> getComputers() {
+    public Set<Computer> getComputers()
+    {
         Set<Computer> result = new HashSet<Computer>();
-        for (Host host : getHosts()) {
-            result.addAll(host.getComputers());
+        for ( Host host : getHosts() )
+        {
+            result.addAll( host.getComputers() );
         }
-        return Collections.unmodifiableSet(result);
+        return Collections.unmodifiableSet( result );
     }
 
-    public Set<PowerState> getAllowedStates() {
+    public Set<PowerState> getAllowedStates()
+    {
         return ResourceHolder.ALLOWED_TRANSITIONS.keySet();
     }
 
-    public Set<PowerState> getAllowedStates(PowerState from) {
-        Set<PowerState> states = ResourceHolder.ALLOWED_TRANSITIONS.get(from);
-        if (states != null) {
+    public Set<PowerState> getAllowedStates( PowerState from )
+    {
+        Set<PowerState> states = ResourceHolder.ALLOWED_TRANSITIONS.get( from );
+        if ( states != null )
+        {
             return states;
         }
         return Collections.emptySet();
     }
 
-    public void close() {
+    public void close()
+    {
         connectionLock.lock();
-        try {
-            if (connectionClosing) {
+        try
+        {
+            if ( connectionClosing )
+            {
                 return;
             }
             connectionClosing = true;
             closingCondition.signalAll();
-        } finally {
+        }
+        finally
+        {
             connectionLock.unlock();
         }
         connectionLock.lock();
-        try {
-            try {
+        try
+        {
+            try
+            {
                 connectionExecutor.shutdown();
-                connection.getProxy().logout(connection.getSessionManager());
-            } catch (RuntimeFaultFaultMsg e) {
+                connection.getProxy().logout( connection.getSessionManager() );
+            }
+            catch ( RuntimeFaultFaultMsg e )
+            {
                 e.printStackTrace();  // TODO logging
-            } finally {
+            }
+            finally
+            {
                 connection = null;
                 connectionExecutor.shutdownNow();
             }
-        } finally {
+        }
+        finally
+        {
             closedCondition.signalAll();
             connectionLock.unlock();
         }
     }
 
-    public boolean isOpen() {
+    public boolean isOpen()
+    {
         connectionLock.lock();
-        try {
+        try
+        {
             return connection != null && !connectionClosing;
-        } finally {
+        }
+        finally
+        {
             connectionLock.unlock();
         }
     }
 
-    public boolean isClosing() {
+    public boolean isClosing()
+    {
         connectionLock.lock();
-        try {
+        try
+        {
             return connectionClosing;
-        } finally {
+        }
+        finally
+        {
             connectionLock.unlock();
         }
     }
 
-    void awaitClosed() throws InterruptedException {
+    void awaitClosed()
+        throws InterruptedException
+    {
         connectionLock.lock();
-        try {
-            while (isOpen()) {
+        try
+        {
+            while ( isOpen() )
+            {
                 closedCondition.await();
             }
-        } finally {
+        }
+        finally
+        {
             connectionLock.unlock();
         }
     }
 
-    boolean awaitClosed(long timeout, TimeUnit unit) throws InterruptedException {
+    boolean awaitClosed( long timeout, TimeUnit unit )
+        throws InterruptedException
+    {
         connectionLock.lock();
-        try {
-            long nanosTimeout = unit.toNanos(timeout);
-            while (isOpen()) {
-                if (nanosTimeout > 0) {
-                    nanosTimeout = closedCondition.awaitNanos(nanosTimeout);
-                } else {
+        try
+        {
+            long nanosTimeout = unit.toNanos( timeout );
+            while ( isOpen() )
+            {
+                if ( nanosTimeout > 0 )
+                {
+                    nanosTimeout = closedCondition.awaitNanos( nanosTimeout );
+                }
+                else
+                {
                     return false;
                 }
             }
             return true;
-        } finally {
+        }
+        finally
+        {
             connectionLock.unlock();
         }
     }
 
-    void awaitClosing() throws InterruptedException {
+    void awaitClosing()
+        throws InterruptedException
+    {
         connectionLock.lock();
-        try {
-            while (!isClosing()) {
+        try
+        {
+            while ( !isClosing() )
+            {
                 closedCondition.await();
             }
-        } finally {
+        }
+        finally
+        {
             connectionLock.unlock();
         }
     }
 
-    boolean awaitClosing(long timeout, TimeUnit unit) throws InterruptedException {
+    boolean awaitClosing( long timeout, TimeUnit unit )
+        throws InterruptedException
+    {
         connectionLock.lock();
-        try {
-            long nanosTimeout = unit.toNanos(timeout);
-            while (!isClosing()) {
-                if (nanosTimeout > 0) {
-                    nanosTimeout = closedCondition.awaitNanos(nanosTimeout);
-                } else {
+        try
+        {
+            long nanosTimeout = unit.toNanos( timeout );
+            while ( !isClosing() )
+            {
+                if ( nanosTimeout > 0 )
+                {
+                    nanosTimeout = closedCondition.awaitNanos( nanosTimeout );
+                }
+                else
+                {
                     return false;
                 }
             }
             return true;
-        } finally {
+        }
+        finally
+        {
             connectionLock.unlock();
         }
     }
 
-    private static final class ResourceHolder {
+    private static final class ResourceHolder
+    {
         private static final Map<PowerState, Set<PowerState>> ALLOWED_TRANSITIONS;
 
-        static {
+        static
+        {
             TreeMap<PowerState, Set<PowerState>> map = new TreeMap<PowerState, Set<PowerState>>();
-            map.put(PowerState.STOPPED, Collections.unmodifiableSet(new TreeSet<PowerState>(
-                    Arrays.asList(PowerState.RUNNING))
-            ));
-            map.put(PowerState.SUSPENDED, Collections.unmodifiableSet(new TreeSet<PowerState>(
-                    Arrays.asList(PowerState.STOPPED, PowerState.RUNNING))
-            ));
-            map.put(PowerState.RUNNING, Collections.unmodifiableSet(new TreeSet<PowerState>(
-                    Arrays.asList(PowerState.STOPPED, PowerState.SUSPENDED))
-            ));
-            ALLOWED_TRANSITIONS = Collections.unmodifiableMap(map);
+            map.put( PowerState.STOPPED,
+                     Collections.unmodifiableSet( new TreeSet<PowerState>( Arrays.asList( PowerState.RUNNING ) ) ) );
+            map.put( PowerState.SUSPENDED, Collections.unmodifiableSet(
+                new TreeSet<PowerState>( Arrays.asList( PowerState.STOPPED, PowerState.RUNNING ) ) ) );
+            map.put( PowerState.RUNNING, Collections.unmodifiableSet(
+                new TreeSet<PowerState>( Arrays.asList( PowerState.STOPPED, PowerState.SUSPENDED ) ) ) );
+            ALLOWED_TRANSITIONS = Collections.unmodifiableMap( map );
         }
     }
 
-    private final class ViTaskController implements TaskController {
+    private final class ViTaskController
+        implements TaskController
+    {
 
         /**
          * {@inheritDoc}
          */
-        public boolean isActive() {
+        public boolean isActive()
+        {
             return !isClosing();
         }
 
         /**
          * {@inheritDoc}
          */
-        public void awaitDeactivated() throws InterruptedException {
+        public void awaitDeactivated()
+            throws InterruptedException
+        {
             awaitClosing();
         }
 
         /**
          * {@inheritDoc}
          */
-        public boolean awaitDeactivated(long timeout, TimeUnit unit) throws InterruptedException {
-            return awaitClosing(timeout, unit);
+        public boolean awaitDeactivated( long timeout, TimeUnit unit )
+            throws InterruptedException
+        {
+            return awaitClosing( timeout, unit );
         }
     }
 
-    private final class ViEventCollector implements Runnable {
+    private final class ViEventCollector
+        implements Runnable
+    {
 
         private final ManagedObjectReference eventHistoryCollector;
+
         private final Queue<Event> events = new ConcurrentLinkedQueue<Event>();
 
-        public ViEventCollector() throws RuntimeFaultFaultMsg, InvalidStateFaultMsg {
-            this.eventHistoryCollector = connection.getProxy()
-                    .createCollectorForEvents(connection.getServiceContent().getEventManager(), new EventFilterSpec());
-            connection.getProxy().resetCollector(eventHistoryCollector);
+        public ViEventCollector()
+            throws RuntimeFaultFaultMsg, InvalidStateFaultMsg
+        {
+            this.eventHistoryCollector =
+                connection.getProxy().createCollectorForEvents( connection.getServiceContent().getEventManager(),
+                                                                new EventFilterSpec() );
+            connection.getProxy().resetCollector( eventHistoryCollector );
         }
 
-        public void run() {
-            System.out.println("Starting collecting events " + new Date());
+        public void run()
+        {
+            System.out.println( "Starting collecting events " + new Date() );
             boolean finished = false;
-            while (!isClosing() && !finished) {
+            while ( !isClosing() && !finished )
+            {
                 List<Event> events = null;
-                try {
-                    events = connection.getProxy().readNextEvents(eventHistoryCollector, 100);
-                } catch (RuntimeFaultFaultMsg e) {
-                    log(e);
+                try
+                {
+                    events = connection.getProxy().readNextEvents( eventHistoryCollector, 100 );
+                }
+                catch ( RuntimeFaultFaultMsg e )
+                {
+                    log( e );
                     return;
                 }
-                if (events.isEmpty()) {
+                if ( events.isEmpty() )
+                {
                     finished = true;
-                } else {
-                    this.events.addAll(events);
+                }
+                else
+                {
+                    this.events.addAll( events );
                 }
             }
-            if (isClosing() && finished) {
+            if ( isClosing() && finished )
+            {
                 // TODO handle the final event correctly
-                this.events.add(new GeneralEvent());
+                this.events.add( new GeneralEvent() );
             }
-            System.out.println("Finished collecting events " + new Date() + events.size());
+            System.out.println( "Finished collecting events " + new Date() + events.size() );
         }
     }
 
-    private static class ViThreadFactory implements ThreadFactory {
+    private static class ViThreadFactory
+        implements ThreadFactory
+    {
         private final ThreadFactory delegate = Executors.defaultThreadFactory();
 
-        public Thread newThread(Runnable r) {
-            Thread result = delegate.newThread(r);
-            result.setName("VMwareESX-" + result.getName());
+        public Thread newThread( Runnable r )
+        {
+            Thread result = delegate.newThread( r );
+            result.setName( "VMwareESX-" + result.getName() );
             return result;
         }
     }
 
-    void log(Throwable t) {
+    void log( Throwable t )
+    {
         // ignore for now;
     }
 
     @Override
-    public ViDatacenterId getId() {
+    public ViDatacenterId getId()
+    {
         return (ViDatacenterId) super.getId();
     }
 }
