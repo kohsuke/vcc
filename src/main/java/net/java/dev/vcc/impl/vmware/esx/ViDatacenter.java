@@ -18,6 +18,7 @@ import net.java.dev.vcc.api.Computer;
 import net.java.dev.vcc.api.DatacenterResourceGroup;
 import net.java.dev.vcc.api.Host;
 import net.java.dev.vcc.api.PowerState;
+import net.java.dev.vcc.api.LogFactory;
 import net.java.dev.vcc.api.profiles.BasicProfile;
 import net.java.dev.vcc.impl.vmware.esx.vim25.Helper;
 import net.java.dev.vcc.spi.AbstractDatacenter;
@@ -73,13 +74,16 @@ final class ViDatacenter
     private final Map<ViDatacenterResourceGroupId, ViDatacenterResourceGroup> resourceGroups =
             Collections.synchronizedMap(new HashMap<ViDatacenterResourceGroupId, ViDatacenterResourceGroup>());
 
+    private final Map<String, AbstractManagedObject> model =
+            Collections.synchronizedMap(new HashMap<String, AbstractManagedObject>());
+
     private ViDatacenter.ViEventCollector eventCollector;
 
     private ManagedObjectReference rootFolder;
 
-    ViDatacenter(ViDatacenterId id, ViConnection connection)
+    ViDatacenter(ViDatacenterId id, ViConnection connection, LogFactory logFactory)
             throws RuntimeFaultFaultMsg, InvalidStateFaultMsg, InvalidPropertyFaultMsg {
-        super(id, BasicProfile.getInstance()); // TODO get capabilities
+        super(logFactory, id, BasicProfile.getInstance()); // TODO get capabilities
         this.connection = connection;
 
         // 1. start collecting events
@@ -189,6 +193,7 @@ final class ViDatacenter
             }
             model.put(entityObject.getValue(), entityMO);
         }
+        this.model.putAll(model);
         for (Map.Entry<String, Collection<AbstractManagedObject>> waitingMOs : waiting.entrySet()) {
             if (proxyParents.containsKey(waitingMOs.getKey())) {
                 AbstractManagedObject parentMO;
@@ -448,8 +453,7 @@ final class ViDatacenter
         }
     }
 
-    private final class ViEventCollector
-            implements Runnable {
+    private final class ViEventCollector implements Runnable {
 
         private final ManagedObjectReference eventHistoryCollector;
 
@@ -486,6 +490,13 @@ final class ViDatacenter
                 this.events.add(new GeneralEvent());
             }
             System.out.println("Finished collecting events " + new Date() + events.size());
+        }
+    }
+
+    private final class ViEventDispatcher implements Runnable {
+
+        public void run() {
+            //To change body of implemented methods use File | Settings | File Templates.
         }
     }
 
