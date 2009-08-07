@@ -3,7 +3,7 @@ package net.java.dev.vcc.impl.vmware.esx;
 import net.java.dev.vcc.api.Command;
 import net.java.dev.vcc.api.Computer;
 import net.java.dev.vcc.api.HostResourceGroup;
-import net.java.dev.vcc.spi.AbstractHost;
+import net.java.dev.vcc.spi.AbstractHostResourceGroup;
 import net.java.dev.vcc.util.CompletedFuture;
 
 import java.util.Collections;
@@ -12,13 +12,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-final class ViHost extends AbstractHost {
+final class ViHostResourceGroup
+        extends AbstractHostResourceGroup {
 
     private final ViDatacenter datacenter;
 
-    private String name;
+    private ViHostResourceGroup parent;
 
-    private ViDatacenterResourceGroup parent;
+    private String name;
 
     private final Map<ViComputerId, ViComputer> computers =
             Collections.synchronizedMap(new HashMap<ViComputerId, ViComputer>());
@@ -26,7 +27,7 @@ final class ViHost extends AbstractHost {
     private final Map<ViHostResourceGroupId, ViHostResourceGroup> resourceGroups =
             Collections.synchronizedMap(new HashMap<ViHostResourceGroupId, ViHostResourceGroup>());
 
-    ViHost(ViDatacenter datacenter, ViHostId id, ViDatacenterResourceGroup parent, String name) {
+    ViHostResourceGroup(ViDatacenter datacenter, ViHostResourceGroupId id, ViHostResourceGroup parent, String name) {
         super(id);
         this.datacenter = datacenter;
         this.parent = parent;
@@ -51,14 +52,14 @@ final class ViHost extends AbstractHost {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     void setName(String name) {
         this.name = name;
     }
 
-    void setParent(ViDatacenterResourceGroup parent) {
+    void setParent(ViHostResourceGroup parent) {
         this.parent = parent;
     }
 
@@ -79,7 +80,7 @@ final class ViHost extends AbstractHost {
     }
 
     @Override
-    public ViHostId getId() {
-        return (ViHostId) super.getId();
+    public ViHostResourceGroupId getId() {
+        return (ViHostResourceGroupId) super.getId();
     }
 }
