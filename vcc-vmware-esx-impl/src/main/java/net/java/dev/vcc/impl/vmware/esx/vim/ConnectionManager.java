@@ -1,8 +1,9 @@
 package net.java.dev.vcc.impl.vmware.esx.vim;
 
-import java.net.MalformedURLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.vmware.vim.ManagedObjectReference;
+import com.vmware.vim.VimPortType;
+import com.vmware.vim.VimService;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
@@ -11,10 +12,9 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
-
-import com.vmware.vim.ManagedObjectReference;
-import com.vmware.vim.VimPortType;
-import com.vmware.vim.VimService;
+import java.net.MalformedURLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ConnectionManager {
 

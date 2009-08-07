@@ -73,7 +73,7 @@ public final class Helper {
     }
 
     public static TraversalSpec newTraversalSpec(String name, String type, String path, Boolean skip,
-                                                 SelectionSpec... selectSet) {
+            SelectionSpec... selectSet) {
         TraversalSpec spec = new TraversalSpec();
         if (name != null) {
             spec.setName(name);
