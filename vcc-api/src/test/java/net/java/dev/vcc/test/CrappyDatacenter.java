@@ -7,6 +7,8 @@ import net.java.dev.vcc.api.DatacenterResourceGroup;
 import net.java.dev.vcc.api.Host;
 import net.java.dev.vcc.api.ManagedObjectId;
 import net.java.dev.vcc.api.PowerState;
+import net.java.dev.vcc.api.LogFactory;
+import net.java.dev.vcc.api.Log;
 import net.java.dev.vcc.spi.AbstractDatacenter;
 
 import java.util.Collections;
@@ -19,16 +21,17 @@ import java.util.concurrent.TimeoutException;
 /**
  * A useless datacenter.
  */
-public class CrappyDatacenter
-        extends AbstractDatacenter {
+public class CrappyDatacenter extends AbstractDatacenter {
 
+    private final Log log;
 
     private final Object lock = new Object();
 
     private boolean open = true;
 
-    public CrappyDatacenter(CrappyDatacenterId crappyDatacenterId) {
-        super(crappyDatacenterId);
+    public CrappyDatacenter(CrappyDatacenterId crappyDatacenterId, LogFactory logFactory) {
+        super(logFactory, crappyDatacenterId);
+        log = logFactory.getLog(getClass());
     }
 
     public Set<Host> getHosts() {
@@ -60,6 +63,7 @@ public class CrappyDatacenter
         synchronized (lock) {
             open = false;
         }
+        getLog().info("Connection closed");
     }
 
     public boolean isOpen() {

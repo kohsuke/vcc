@@ -15,7 +15,11 @@ public class SmokeTest {
     @Test
     public void smokes() throws IOException {
         final Datacenter datacenter = DatacenterManager.getConnection("vcc:crappy:localhost", "", "".toCharArray());
+        try {
         assertThat(datacenter, IsNull.notNullValue());
         assertThat(datacenter, Is.is(CrappyDatacenter.class));
+        } finally {
+            datacenter.close();
+        }
     }
 }

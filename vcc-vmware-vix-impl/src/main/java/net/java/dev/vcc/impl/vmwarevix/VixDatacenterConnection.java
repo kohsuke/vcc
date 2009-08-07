@@ -2,6 +2,7 @@ package net.java.dev.vcc.impl.vmwarevix;
 
 import net.java.dev.vcc.spi.AbstractDatacenter;
 import net.java.dev.vcc.spi.DatacenterConnection;
+import net.java.dev.vcc.api.LogFactory;
 
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -16,7 +17,7 @@ public class VixDatacenterConnection
         return URL_PATTERN.matcher(url).matches();
     }
 
-    public AbstractDatacenter connect(String url, String username, char[] password) {
+    public AbstractDatacenter connect(String url, String username, char[] password, LogFactory logFactory) {
         return null;
     }
 
