@@ -1,6 +1,7 @@
 package net.java.dev.vcc.spi;
 
 import net.java.dev.vcc.api.Computer;
+import net.java.dev.vcc.api.ComputerTemplate;
 import net.java.dev.vcc.api.Host;
 import net.java.dev.vcc.api.HostResourceGroup;
 import net.java.dev.vcc.api.ManagedObjectId;
@@ -20,12 +21,30 @@ public abstract class AbstractHost
         super(id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public Set<ComputerTemplate> getComputerTemplates() {
+        return Collections.emptySet();
+    }
+
     public Set<Computer> getComputers() {
         return Collections.emptySet();
     }
 
     public Set<HostResourceGroup> getHostResourceGroups() {
         return Collections.emptySet();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Set<ComputerTemplate> getAllComputerTemplates() {
+        Set<ComputerTemplate> result = new HashSet<ComputerTemplate>(getComputerTemplates());
+        for (HostResourceGroup group : getHostResourceGroups()) {
+            result.addAll(group.getAllComputerTemplates());
+        }
+        return result;
     }
 
     /**

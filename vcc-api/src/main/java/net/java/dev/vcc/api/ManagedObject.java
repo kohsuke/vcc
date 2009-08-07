@@ -21,7 +21,22 @@ public interface ManagedObject<T extends ManagedObject<T>> {
      *
      * @param command the command to execute.
      * @param <T>     the type of this command.
+     *
      * @return the command parameter (to support method chaining).
      */
     <T extends Command> T execute(T command);
+
+    /**
+     * Gets the name of this managed object.
+     *
+     * @return the name of this managed object.
+     */
+    String getName();
+
+    /**
+     * Gets the description of this managed object or {@code null} if descriptions are not supported.
+     *
+     * @return the description of this managed object or {@code null} if descriptions are not supported.
+     */
+    String getDescription();
 }

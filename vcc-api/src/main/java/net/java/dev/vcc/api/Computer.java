@@ -23,14 +23,13 @@ public interface Computer extends ManagedObject<Computer> {
     boolean isHostChanging();
 
     /**
-     * If {@link #isHostChanging()} is {@code true} then this method returns a {@link Future}
-     * for the {@link Host} that the computer is migrating to, otherwise this method will return a completed
-     * {@link Future} for the current {@link Host}.  When the host is changing, the future will be completed
-     * when the host migration has completed, thus allowing a consumer of the API to
-     * be notified when a host migration has completed.
+     * If {@link #isHostChanging()} is {@code true} then this method returns a {@link Future} for the {@link Host} that
+     * the computer is migrating to, otherwise this method will return a completed {@link Future} for the current {@link
+     * Host}.  When the host is changing, the future will be completed when the host migration has completed, thus
+     * allowing a consumer of the API to be notified when a host migration has completed.
      *
-     * @return Either a completed {@link Future} for the current host, or a {@link Future} that
-     *         will complete when the computer has finished migrating to a new host.
+     * @return Either a completed {@link Future} for the current host, or a {@link Future} that will complete when the
+     *         computer has finished migrating to a new host.
      */
     Future<Host> getFutureHost();
 
@@ -49,14 +48,13 @@ public interface Computer extends ManagedObject<Computer> {
     boolean isStateChanging();
 
     /**
-     * If {@link #isStateChanging()} is {@code true} then this method returns a {@link Future}
-     * for the state that the computer is transitioning into, otherwise this method will return a completed
-     * {@link Future} for the current state.  When the state is changing, the future will be completed
-     * when the state transition has completed, thus allowing a consumer of the API to
-     * be notified when a power state change has completed.
+     * If {@link #isStateChanging()} is {@code true} then this method returns a {@link Future} for the state that the
+     * computer is transitioning into, otherwise this method will return a completed {@link Future} for the current
+     * state.  When the state is changing, the future will be completed when the state transition has completed, thus
+     * allowing a consumer of the API to be notified when a power state change has completed.
      *
-     * @return Either a completed {@link Future} for the current state, or a {@link Future} that
-     *         will complete when the state has finished changing.
+     * @return Either a completed {@link Future} for the current state, or a {@link Future} that will complete when the
+     *         state has finished changing.
      */
     Future<PowerState> getFutureState();
 
@@ -73,19 +71,5 @@ public interface Computer extends ManagedObject<Computer> {
      * @return the hosts that this computer can be migrated to.
      */
     Set<Host> getAllowedHosts();
-
-    /**
-     * Gets the name of this virtual computer.
-     *
-     * @return the name of this virtual computer.
-     */
-    String getName();
-
-    /**
-     * Gets the description of this virtual computer or {@code null} if descriptions are not supported.
-     *
-     * @return the description of this virtual computer or {@code null} if descriptions are not supported.
-     */
-    String getDescription();
 
 }

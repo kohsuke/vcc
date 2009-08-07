@@ -1,8 +1,23 @@
 package net.java.dev.vcc.spi;
 
-import net.java.dev.vcc.api.*;
+import net.java.dev.vcc.api.CapabilityProfile;
+import net.java.dev.vcc.api.Command;
+import net.java.dev.vcc.api.Computer;
+import net.java.dev.vcc.api.ComputerTemplate;
+import net.java.dev.vcc.api.Datacenter;
+import net.java.dev.vcc.api.DatacenterResourceGroup;
+import net.java.dev.vcc.api.Host;
+import net.java.dev.vcc.api.HostResourceGroup;
+import net.java.dev.vcc.api.ManagedObject;
+import net.java.dev.vcc.api.ManagedObjectId;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The base class from which all Service Provider Implementations map a connection from.
@@ -62,14 +77,22 @@ public abstract class AbstractDatacenter
      * Helper method.
      *
      * @param object   The type of {@link net.java.dev.vcc.api.ManagedObject}
-     * @param commands The types of {@link net.java.dev.vcc.api.Command}s supported on the
-     *                 {@link net.java.dev.vcc.api.ManagedObject}.
+     * @param commands The types of {@link net.java.dev.vcc.api.Command}s supported on the {@link
+     *                 net.java.dev.vcc.api.ManagedObject}.
+     *
      * @return An {@link java.util.Map.Entry} for use in the constructor.
      */
     protected static Map.Entry<Class<? extends ManagedObject>, Set<Class<? extends Command>>> with(
             Class<? extends ManagedObject> object, Class<? extends Command>... commands) {
         return new AbstractMap.SimpleImmutableEntry<Class<? extends ManagedObject>, Set<Class<? extends Command>>>(
                 object, Collections.unmodifiableSet(new HashSet<Class<? extends Command>>(Arrays.asList(commands))));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Set<ComputerTemplate> getComputerTemplates() {
+        return Collections.emptySet();
     }
 
     /**
@@ -93,6 +116,20 @@ public abstract class AbstractDatacenter
         Set<Host> result = new HashSet<Host>(getHosts());
         for (DatacenterResourceGroup group : getDatacenterResourceGroups()) {
             result.addAll(group.getAllHosts());
+        }
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Set<ComputerTemplate> getAllComputerTemplates() {
+        Set<ComputerTemplate> result = new HashSet<ComputerTemplate>(getComputerTemplates());
+        for (DatacenterResourceGroup group : getDatacenterResourceGroups()) {
+            result.addAll(group.getAllComputerTemplates());
+        }
+        for (Host host : getHosts()) {
+            result.addAll(host.getAllComputerTemplates());
         }
         return result;
     }

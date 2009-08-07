@@ -12,6 +12,7 @@ import com.vmware.vim25.PropertyFilterSpec;
 import com.vmware.vim25.PropertySpec;
 import com.vmware.vim25.RuntimeFaultFaultMsg;
 import com.vmware.vim25.TraversalSpec;
+import com.vmware.vim25.VirtualMachineConfigInfo;
 import net.java.dev.vcc.api.Command;
 import net.java.dev.vcc.api.Computer;
 import net.java.dev.vcc.api.DatacenterResourceGroup;
@@ -108,6 +109,7 @@ final class ViDatacenter
                         Helper.newPropertySpec("ManagedEntity", false, "name"),
                         Helper.newPropertySpec("ManagedEntity", false, "parent"),
                         Helper.newPropertySpec("VirtualMachine", false, "resourcePool"),
+                        Helper.newPropertySpec("VirtualMachine", false, "config"),
                 },
                 new ObjectSpec[]{Helper.newObjectSpec(rootFolder, false, folderTraversalSpec)});
 
@@ -118,6 +120,7 @@ final class ViDatacenter
         List<ObjectContent> entities =
                 connection.getProxy().retrieveProperties(connection.getServiceContent().getPropertyCollector(),
                         Collections.singletonList(spec));
+        Map<String, String> proxyParents = new HashMap<String, String>();
         for (ObjectContent entity : entities) {
             ManagedObjectReference entityObject = entity.getObj();
             if (model.containsKey(entityObject.getValue())) {
@@ -127,20 +130,30 @@ final class ViDatacenter
             String entityType = entityObject.getType();
             String entityName = (String) Helper.getDynamicProperty(entity, "name");
             if ("VirtualMachine".equals(entityType)) {
-                entityMO = new ViComputer(this, new ViComputerId(getId(), entityObject), null, entityName);
+                VirtualMachineConfigInfo config = (VirtualMachineConfigInfo) Helper
+                        .getDynamicProperty(entity, "config");
+                if (config != null && config.isTemplate()) {
+                    entityMO = new ViComputerTemplate(this, new ViComputerTemplateId(getId(), entityObject), null,
+                            entityName);
+                } else {
+                    entityMO = new ViComputer(this, new ViComputerId(getId(), entityObject), null, entityName);
+                }
             } else if ("ComputeResource".equals(entityType)) {
                 entityMO = new ViHost(this, new ViHostId(getId(), entityObject), null, entityName);
             } else if ("ResourcePool".equals(entityType)) {
                 entityMO = new ViHostResourceGroup(this, new ViHostResourceGroupId(getId(), entityObject), null,
                         entityName);
             } else if ("Folder".equals(entityType)) {
+                ManagedObjectReference parent = (ManagedObjectReference) Helper.getDynamicProperty(entity, "parent");
+                if (parent != null && "Datacenter".equals(parent.getType())) {
+                    proxyParents.put(entityObject.getValue(), parent.getValue());
+                    continue;
+                }
                 entityMO = new ViDatacenterResourceGroup(this, new ViDatacenterResourceGroupId(getId(), entityObject),
-                        null,
-                        entityName);
+                        null, entityName);
             } else if ("Datacenter".equals(entityType)) {
                 entityMO = new ViDatacenterResourceGroup(this, new ViDatacenterResourceGroupId(getId(), entityObject),
-                        null,
-                        entityName);
+                        null, entityName);
             } else {
                 // unknown object type
                 continue;
@@ -151,7 +164,12 @@ final class ViDatacenter
                 parent = (ManagedObjectReference) Helper.getDynamicProperty(entity, "parent");
             }
             if (parent != null) {
-                AbstractManagedObject parentMO = model.get(parent.getValue());
+                AbstractManagedObject parentMO;
+                if (proxyParents.containsKey(parent.getValue())) {
+                    parentMO = model.get(proxyParents.get(parent.getValue()));
+                } else {
+                    parentMO = model.get(parent.getValue());
+                }
                 if (parentMO != null) {
                     addChildMO(parentMO, entityMO);
                 } else {
@@ -170,6 +188,17 @@ final class ViDatacenter
                 waiting.remove(entityObject.getValue());
             }
             model.put(entityObject.getValue(), entityMO);
+        }
+        for (Map.Entry<String, Collection<AbstractManagedObject>> waitingMOs : waiting.entrySet()) {
+            if (proxyParents.containsKey(waitingMOs.getKey())) {
+                AbstractManagedObject parentMO;
+                if (proxyParents.containsKey(waitingMOs.getKey())) {
+                    parentMO = model.get(proxyParents.get(waitingMOs.getKey()));
+                    for (AbstractManagedObject childMO : waitingMOs.getValue()) {
+                        addChildMO(parentMO, childMO);
+                    }
+                }
+            }
         }
         // 3. start dispatching events
     }
@@ -192,10 +221,12 @@ final class ViDatacenter
                 ((ViDatacenterResourceGroup) parentMO).addHost((ViHost) childMO);
             } else if (childMO instanceof ViDatacenterResourceGroup) {
                 ((ViDatacenterResourceGroup) parentMO).addResourceGroup((ViDatacenterResourceGroup) childMO);
+            } else if (childMO instanceof ViComputerTemplate) {
+                ((ViDatacenterResourceGroup) parentMO).addComputerTemplate((ViComputerTemplate) childMO);
             }
         } else if (parentMO instanceof ViDatacenter) {
             if (childMO instanceof ViDatacenterResourceGroup) {
-                ((ViDatacenter) parentMO).addResourceGroup((ViDatacenterResourceGroup) childMO);
+                ((ViDatacenter) parentMO).addDatacenterResourceGroup((ViDatacenterResourceGroup) childMO);
             } else if (childMO instanceof ViHost) {
                 ((ViDatacenter) parentMO).addHost((ViHost) childMO);
             }
@@ -210,7 +241,7 @@ final class ViDatacenter
         hosts.remove(viHost.getId());
     }
 
-    public void addResourceGroup(ViDatacenterResourceGroup viResourceGroup) {
+    public void addDatacenterResourceGroup(ViDatacenterResourceGroup viResourceGroup) {
         resourceGroups.put(viResourceGroup.getId(), viResourceGroup);
     }
 
@@ -225,6 +256,10 @@ final class ViDatacenter
     public <T extends Command> T execute(T command) {
         command.setSubmitted(new CompletedFuture("Unsupported command", new UnsupportedOperationException()));
         return command;
+    }
+
+    public String getName() {
+        return getId().getDatacenterUrl();
     }
 
     public Set<Host> getHosts() {

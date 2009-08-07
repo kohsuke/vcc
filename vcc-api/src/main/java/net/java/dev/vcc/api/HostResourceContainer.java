@@ -21,6 +21,13 @@ interface HostResourceContainer {
     Set<HostResourceGroup> getHostResourceGroups();
 
     /**
+     * Gets all the computer templates that are contained in this container.
+     *
+     * @return the computer templates that are contained in this container.
+     */
+    Set<ComputerTemplate> getComputerTemplates();
+
+    /**
      * Gets all the virtual computers that are contained in this container including children.
      *
      * @return the virtual computers that are contained in this container including children.
@@ -28,9 +35,18 @@ interface HostResourceContainer {
     Set<Computer> getAllComputers();
 
     /**
-     * Gets all the {@link net.java.dev.vcc.api.HostResourceGroup}s that are contained in this container including children.
+     * Gets all the computer templates that are contained in this container including children.
      *
-     * @return the {@link net.java.dev.vcc.api.HostResourceGroup}s that are contained in this container including children.
+     * @return the computer templates that are contained in this container including children.
+     */
+    Set<ComputerTemplate> getAllComputerTemplates();
+
+    /**
+     * Gets all the {@link net.java.dev.vcc.api.HostResourceGroup}s that are contained in this container including
+     * children.
+     *
+     * @return the {@link net.java.dev.vcc.api.HostResourceGroup}s that are contained in this container including
+     *         children.
      */
     Set<HostResourceGroup> getAllHostResourceGroups();
 }

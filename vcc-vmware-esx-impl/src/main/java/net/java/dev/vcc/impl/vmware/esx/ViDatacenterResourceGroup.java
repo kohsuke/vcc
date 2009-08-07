@@ -1,7 +1,9 @@
 package net.java.dev.vcc.impl.vmware.esx;
 
 import net.java.dev.vcc.api.Command;
+import net.java.dev.vcc.api.ComputerTemplate;
 import net.java.dev.vcc.api.DatacenterResourceGroup;
+import net.java.dev.vcc.api.Host;
 import net.java.dev.vcc.api.ManagedObjectId;
 import net.java.dev.vcc.spi.AbstractDatacenterResourceGroup;
 import net.java.dev.vcc.util.CompletedFuture;
@@ -23,11 +25,14 @@ final class ViDatacenterResourceGroup
 
     private final Map<ViHostId, ViHost> hosts = Collections.synchronizedMap(new HashMap<ViHostId, ViHost>());
 
+    private final Map<ViComputerTemplateId, ViComputerTemplate> templates = Collections
+            .synchronizedMap(new HashMap<ViComputerTemplateId, ViComputerTemplate>());
+
     private final Map<ViDatacenterResourceGroupId, ViDatacenterResourceGroup> resourceGroups =
             Collections.synchronizedMap(new HashMap<ViDatacenterResourceGroupId, ViDatacenterResourceGroup>());
 
     ViDatacenterResourceGroup(ViDatacenter datacenter, ManagedObjectId<DatacenterResourceGroup> id,
-            ViDatacenterResourceGroup parent, String name) {
+                              ViDatacenterResourceGroup parent, String name) {
         super(id);
         this.datacenter = datacenter;
         this.parent = parent;
@@ -45,6 +50,15 @@ final class ViDatacenterResourceGroup
 
     public Set<DatacenterResourceGroup> getDatacenterResourceGroups() {
         return Collections.unmodifiableSet(new HashSet<DatacenterResourceGroup>(resourceGroups.values()));
+    }
+
+    public Set<Host> getHosts() {
+        return Collections.unmodifiableSet(new HashSet<Host>(hosts.values()));
+    }
+
+    @Override
+    public Set<ComputerTemplate> getComputerTemplates() {
+        return Collections.unmodifiableSet(new HashSet<ComputerTemplate>(templates.values()));
     }
 
     public String getName() {
@@ -73,6 +87,14 @@ final class ViDatacenterResourceGroup
 
     public void removeResourceGroup(ViDatacenterResourceGroup viResourceGroup) {
         resourceGroups.remove(viResourceGroup.getId());
+    }
+
+    public void addComputerTemplate(ViComputerTemplate computerTemplate) {
+        templates.put(computerTemplate.getId(), computerTemplate);
+    }
+
+    public void removeComputerTemplate(ViComputerTemplate computerTemplate) {
+        templates.remove(computerTemplate.getId());
     }
 
     @Override

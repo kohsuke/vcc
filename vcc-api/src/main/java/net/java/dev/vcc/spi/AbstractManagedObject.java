@@ -28,4 +28,8 @@ public abstract class AbstractManagedObject<T extends ManagedObject<T>> implemen
     public final int hashCode() {
         return id.hashCode();
     }
+
+    public String getDescription() {
+        return null;
+    }
 }
