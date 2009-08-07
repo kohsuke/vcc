@@ -2,7 +2,6 @@ package net.java.dev.vcc.impl.vmware.esx;
 
 import com.vmware.vim25.Event;
 import com.vmware.vim25.EventFilterSpec;
-import com.vmware.vim25.GeneralEvent;
 import com.vmware.vim25.InvalidPropertyFaultMsg;
 import com.vmware.vim25.InvalidStateFaultMsg;
 import com.vmware.vim25.ManagedObjectReference;
@@ -17,8 +16,8 @@ import net.java.dev.vcc.api.Command;
 import net.java.dev.vcc.api.Computer;
 import net.java.dev.vcc.api.DatacenterResourceGroup;
 import net.java.dev.vcc.api.Host;
-import net.java.dev.vcc.api.PowerState;
 import net.java.dev.vcc.api.LogFactory;
+import net.java.dev.vcc.api.PowerState;
 import net.java.dev.vcc.api.profiles.BasicProfile;
 import net.java.dev.vcc.impl.vmware.esx.vim25.Helper;
 import net.java.dev.vcc.spi.AbstractDatacenter;
@@ -31,9 +30,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -80,132 +79,169 @@ final class ViDatacenter
     private ViDatacenter.ViEventCollector eventCollector;
 
     private ManagedObjectReference rootFolder;
+    private ViDatacenter.ViEventDispatcher eventDispatcher;
 
     ViDatacenter(ViDatacenterId id, ViConnection connection, LogFactory logFactory)
             throws RuntimeFaultFaultMsg, InvalidStateFaultMsg, InvalidPropertyFaultMsg {
         super(logFactory, id, BasicProfile.getInstance()); // TODO get capabilities
         this.connection = connection;
 
+        getLog().debug("Starting event collector");
+
         // 1. start collecting events
+        eventDispatcher = new ViEventDispatcher();
         eventCollector = new ViEventCollector();
         connectionExecutor.submit(new DefaultPollingTask(taskController, eventCollector, 1, TimeUnit.SECONDS));
+        try {
+            getLog().debug("Getting datacenter inventory");
 
-        // 2. find what's out there
-        TraversalSpec folderTraversalSpec =
-                Helper.newTraversalSpec("folderTraversalSpec", "Folder", "childEntity", false,
-                        Helper.newSelectionSpec("folderTraversalSpec"),
-                        Helper.newTraversalSpec("datacenterHostTraversalSpec", "Datacenter", "hostFolder",
-                                false, Helper.newSelectionSpec("folderTraversalSpec")),
-                        Helper.newTraversalSpec("datacenterVmTraversalSpec", "Datacenter", "vmFolder",
-                                false, Helper.newSelectionSpec("folderTraversalSpec")),
-                        Helper.newTraversalSpec("computeResourceRpTraversalSpec", "ComputeResource",
-                                "resourcePool", false,
-                                Helper.newSelectionSpec("resourcePoolTraversalSpec")),
-                        Helper.newTraversalSpec("computeResourceHostTraversalSpec", "ComputeResource",
-                                "host", false),
-                        Helper.newTraversalSpec("resourcePoolTraversalSpec", "ResourcePool",
-                                "resourcePool", false, Helper.newSelectionSpec(
-                                        "resourcePoolTraversalSpec")));
+            // 2. find what's out there
+            TraversalSpec folderTraversalSpec =
+                    Helper.newTraversalSpec("folderTraversalSpec", "Folder", "childEntity", false,
+                            Helper.newSelectionSpec("folderTraversalSpec"),
+                            Helper.newTraversalSpec("datacenterHostTraversalSpec", "Datacenter", "hostFolder",
+                                    false, Helper.newSelectionSpec("folderTraversalSpec")),
+                            Helper.newTraversalSpec("datacenterVmTraversalSpec", "Datacenter", "vmFolder",
+                                    false, Helper.newSelectionSpec("folderTraversalSpec")),
+                            Helper.newTraversalSpec("computeResourceRpTraversalSpec", "ComputeResource",
+                                    "resourcePool", false,
+                                    Helper.newSelectionSpec("resourcePoolTraversalSpec")),
+                            Helper.newTraversalSpec("computeResourceHostTraversalSpec", "ComputeResource",
+                                    "host", false),
+                            Helper.newTraversalSpec("resourcePoolTraversalSpec", "ResourcePool",
+                                    "resourcePool", false, Helper.newSelectionSpec(
+                                            "resourcePoolTraversalSpec")));
 
-        rootFolder = connection.getServiceContent().getRootFolder();
-        PropertyFilterSpec spec = Helper.newPropertyFilterSpec(
-                new PropertySpec[]{
-                        Helper.newPropertySpec("ManagedEntity", false, "name"),
-                        Helper.newPropertySpec("ManagedEntity", false, "parent"),
-                        Helper.newPropertySpec("VirtualMachine", false, "resourcePool"),
-                        Helper.newPropertySpec("VirtualMachine", false, "config"),
-                },
-                new ObjectSpec[]{Helper.newObjectSpec(rootFolder, false, folderTraversalSpec)});
+            rootFolder = connection.getServiceContent().getRootFolder();
+            PropertyFilterSpec spec = Helper.newPropertyFilterSpec(
+                    new PropertySpec[]{
+                            Helper.newPropertySpec("ManagedEntity", false, "name"),
+                            Helper.newPropertySpec("ManagedEntity", false, "parent"),
+                            Helper.newPropertySpec("VirtualMachine", false, "resourcePool"),
+                            Helper.newPropertySpec("VirtualMachine", false, "config"),
+                    },
+                    new ObjectSpec[]{Helper.newObjectSpec(rootFolder, false, folderTraversalSpec)});
 
-        Map<String, AbstractManagedObject> model = new HashMap<String, AbstractManagedObject>();
-        model.put(rootFolder.getValue(), this);
-        Map<String, Collection<AbstractManagedObject>> waiting =
-                new HashMap<String, Collection<AbstractManagedObject>>();
-        List<ObjectContent> entities =
-                connection.getProxy().retrieveProperties(connection.getServiceContent().getPropertyCollector(),
-                        Collections.singletonList(spec));
-        Map<String, String> proxyParents = new HashMap<String, String>();
-        for (ObjectContent entity : entities) {
-            ManagedObjectReference entityObject = entity.getObj();
-            if (model.containsKey(entityObject.getValue())) {
-                continue;
-            }
-            AbstractManagedObject entityMO;
-            String entityType = entityObject.getType();
-            String entityName = (String) Helper.getDynamicProperty(entity, "name");
-            if ("VirtualMachine".equals(entityType)) {
-                VirtualMachineConfigInfo config = (VirtualMachineConfigInfo) Helper
-                        .getDynamicProperty(entity, "config");
-                if (config != null && config.isTemplate()) {
-                    entityMO = new ViComputerTemplate(this, new ViComputerTemplateId(getId(), entityObject), null,
-                            entityName);
-                } else {
-                    entityMO = new ViComputer(this, new ViComputerId(getId(), entityObject), null, entityName);
-                }
-            } else if ("ComputeResource".equals(entityType)) {
-                entityMO = new ViHost(this, new ViHostId(getId(), entityObject), null, entityName);
-            } else if ("ResourcePool".equals(entityType)) {
-                entityMO = new ViHostResourceGroup(this, new ViHostResourceGroupId(getId(), entityObject), null,
-                        entityName);
-            } else if ("Folder".equals(entityType)) {
-                ManagedObjectReference parent = (ManagedObjectReference) Helper.getDynamicProperty(entity, "parent");
-                if (parent != null && "Datacenter".equals(parent.getType())) {
-                    proxyParents.put(entityObject.getValue(), parent.getValue());
+            Map<String, AbstractManagedObject> model = new HashMap<String, AbstractManagedObject>();
+            model.put(rootFolder.getValue(), this);
+            Map<String, Collection<AbstractManagedObject>> waiting =
+                    new HashMap<String, Collection<AbstractManagedObject>>();
+            Map<String, String> proxyParents = new HashMap<String, String>();
+            List<ObjectContent> entities =
+                    connection.getProxy().retrieveProperties(connection.getServiceContent().getPropertyCollector(),
+                            Collections.singletonList(spec));
+
+            getLog().debug("Building model from inventory");
+
+            for (ObjectContent entity : entities) {
+                ManagedObjectReference entityObject = entity.getObj();
+                if (model.containsKey(entityObject.getValue())) {
                     continue;
                 }
-                entityMO = new ViDatacenterResourceGroup(this, new ViDatacenterResourceGroupId(getId(), entityObject),
-                        null, entityName);
-            } else if ("Datacenter".equals(entityType)) {
-                entityMO = new ViDatacenterResourceGroup(this, new ViDatacenterResourceGroupId(getId(), entityObject),
-                        null, entityName);
-            } else {
-                // unknown object type
-                continue;
-            }
-            ManagedObjectReference parent =
-                    (ManagedObjectReference) Helper.getDynamicProperty(entity, "resourcePool");
-            if (parent == null) {
-                parent = (ManagedObjectReference) Helper.getDynamicProperty(entity, "parent");
-            }
-            if (parent != null) {
-                AbstractManagedObject parentMO;
-                if (proxyParents.containsKey(parent.getValue())) {
-                    parentMO = model.get(proxyParents.get(parent.getValue()));
-                } else {
-                    parentMO = model.get(parent.getValue());
-                }
-                if (parentMO != null) {
-                    addChildMO(parentMO, entityMO);
-                } else {
-                    Collection<AbstractManagedObject> pendingChildMOs = waiting.get(parent.getValue());
-                    if (pendingChildMOs == null) {
-                        waiting.put(parent.getValue(), pendingChildMOs = new ArrayList<AbstractManagedObject>());
+                AbstractManagedObject entityMO;
+                String entityType = entityObject.getType();
+                String entityName = (String) Helper.getDynamicProperty(entity, "name");
+                if ("VirtualMachine".equals(entityType)) {
+                    VirtualMachineConfigInfo config = (VirtualMachineConfigInfo) Helper
+                            .getDynamicProperty(entity, "config");
+                    if (config != null && config.isTemplate()) {
+                        entityMO = new ViComputerTemplate(this, new ViComputerTemplateId(getId(), entityObject), null,
+                                entityName);
+                    } else {
+                        entityMO = new ViComputer(this, new ViComputerId(getId(), entityObject), null, entityName);
                     }
-                    pendingChildMOs.add(entityMO);
+                } else if ("ComputeResource".equals(entityType)) {
+                    entityMO = new ViHost(this, new ViHostId(getId(), entityObject), null, entityName);
+                } else if ("ResourcePool".equals(entityType)) {
+                    entityMO = new ViHostResourceGroup(this, new ViHostResourceGroupId(getId(), entityObject), null,
+                            entityName);
+                } else if ("Folder".equals(entityType)) {
+                    ManagedObjectReference parent = (ManagedObjectReference) Helper
+                            .getDynamicProperty(entity, "parent");
+                    if (parent != null && "Datacenter".equals(parent.getType())) {
+                        proxyParents.put(entityObject.getValue(), parent.getValue());
+                        continue;
+                    }
+                    entityMO = new ViDatacenterResourceGroup(this,
+                            new ViDatacenterResourceGroupId(getId(), entityObject),
+                            null, entityName);
+                } else if ("Datacenter".equals(entityType)) {
+                    entityMO = new ViDatacenterResourceGroup(this,
+                            new ViDatacenterResourceGroupId(getId(), entityObject),
+                            null, entityName);
+                } else {
+                    // unknown object type
+                    continue;
                 }
-            }
-            Collection<AbstractManagedObject> _waiting = waiting.get(entityObject.getValue());
-            if (_waiting != null) {
-                for (AbstractManagedObject childMO : _waiting) {
-                    addChildMO(entityMO, childMO);
+                ManagedObjectReference parent =
+                        (ManagedObjectReference) Helper.getDynamicProperty(entity, "resourcePool");
+                if (parent == null) {
+                    parent = (ManagedObjectReference) Helper.getDynamicProperty(entity, "parent");
                 }
-                waiting.remove(entityObject.getValue());
+                if (parent != null) {
+                    AbstractManagedObject parentMO;
+                    if (proxyParents.containsKey(parent.getValue())) {
+                        parentMO = model.get(proxyParents.get(parent.getValue()));
+                    } else {
+                        parentMO = model.get(parent.getValue());
+                    }
+                    if (parentMO != null) {
+                        addChildMO(parentMO, entityMO);
+                    } else {
+                        Collection<AbstractManagedObject> pendingChildMOs = waiting.get(parent.getValue());
+                        if (pendingChildMOs == null) {
+                            waiting.put(parent.getValue(), pendingChildMOs = new ArrayList<AbstractManagedObject>());
+                        }
+                        pendingChildMOs.add(entityMO);
+                    }
+                }
+                Collection<AbstractManagedObject> _waiting = waiting.get(entityObject.getValue());
+                if (_waiting != null) {
+                    for (AbstractManagedObject childMO : _waiting) {
+                        addChildMO(entityMO, childMO);
+                    }
+                    waiting.remove(entityObject.getValue());
+                }
+                model.put(entityObject.getValue(), entityMO);
             }
-            model.put(entityObject.getValue(), entityMO);
-        }
-        this.model.putAll(model);
-        for (Map.Entry<String, Collection<AbstractManagedObject>> waitingMOs : waiting.entrySet()) {
-            if (proxyParents.containsKey(waitingMOs.getKey())) {
-                AbstractManagedObject parentMO;
+            this.model.putAll(model);
+            for (Iterator<Map.Entry<String, Collection<AbstractManagedObject>>> it = waiting.entrySet().iterator();
+                    it.hasNext();) {
+                Map.Entry<String, Collection<AbstractManagedObject>> waitingMOs = it.next();
                 if (proxyParents.containsKey(waitingMOs.getKey())) {
-                    parentMO = model.get(proxyParents.get(waitingMOs.getKey()));
-                    for (AbstractManagedObject childMO : waitingMOs.getValue()) {
-                        addChildMO(parentMO, childMO);
+                    AbstractManagedObject parentMO;
+                    if (proxyParents.containsKey(waitingMOs.getKey())) {
+                        parentMO = model.get(proxyParents.get(waitingMOs.getKey()));
+                        for (AbstractManagedObject childMO : waitingMOs.getValue()) {
+                            addChildMO(parentMO, childMO);
+                        }
                     }
+                    it.remove();
                 }
             }
+
+            if (waiting.isEmpty()) {
+                getLog().debug("Datacenter model constructed successfully");
+            } else {
+                getLog().warn("Datacenter model is not complete: "
+                        + "{0} parents were referenced from the inventory but not provided in the inventory",
+                        waiting.size());
+            }
+            // 3. start dispatching events
+
+            getLog().debug("Starting event dispatcher");
+            connectionExecutor.submit(eventDispatcher);
+        } catch (RuntimeException e) {
+            close();
+            throw e;
+        } catch (RuntimeFaultFaultMsg e) {
+            close();
+            throw e;
+        } catch (InvalidPropertyFaultMsg e) {
+            close();
+            throw e;
         }
-        // 3. start dispatching events
+        getLog().debug("Datacenter created");
     }
 
     private void addChildMO(AbstractManagedObject parentMO, AbstractManagedObject childMO) {
@@ -468,35 +504,62 @@ final class ViDatacenter
         }
 
         public void run() {
-            System.out.println("Starting collecting events " + new Date());
-            boolean finished = false;
-            while (!isClosing() && !finished) {
-                List<Event> events = null;
-                try {
-                    events = connection.getProxy().readNextEvents(eventHistoryCollector, 100);
+            getLog().debug("Starting collecting events");
+            try {
+                boolean finished = false;
+                while (!isClosing() && !finished) {
+                    List<Event> events = null;
+                    try {
+                        events = connection.getProxy().readNextEvents(eventHistoryCollector, 100);
+                    }
+                    catch (RuntimeFaultFaultMsg e) {
+                        log(e);
+                        return;
+                    }
+                    if (events.isEmpty()) {
+                        finished = true;
+                    } else {
+                        this.events.addAll(events);
+                    }
                 }
-                catch (RuntimeFaultFaultMsg e) {
-                    log(e);
-                    return;
+                if (isClosing() && finished) {
+                    this.events.add(new ClosingConnectionEvent());
                 }
-                if (events.isEmpty()) {
-                    finished = true;
-                } else {
-                    this.events.addAll(events);
-                }
+            } finally {
+                getLog().debug("Finished collecting events. Currently there are {0} events in the queue.",
+                        events.size());
             }
-            if (isClosing() && finished) {
-                // TODO handle the final event correctly
-                this.events.add(new GeneralEvent());
-            }
-            System.out.println("Finished collecting events " + new Date() + events.size());
         }
+    }
+
+    private final static class ClosingConnectionEvent extends Event {
+
     }
 
     private final class ViEventDispatcher implements Runnable {
 
         public void run() {
-            //To change body of implemented methods use File | Settings | File Templates.
+            getLog().debug("Event dispatcher thread started.");
+            try {
+                while (!isClosing()) {
+                    final Event event = eventCollector.events.poll();
+                    if (event instanceof ClosingConnectionEvent) {
+                        getLog().debug("Received connection closing event");
+                        break;
+                    }
+                    ManagedObjectReference ref = null;
+                    // TODO look up the managed object from the event
+                    if (ref != null) {
+                        final AbstractManagedObject managedObject = model.get(ref.getValue());
+                        if (managedObject instanceof ViEventReceiver) {
+                            ((ViEventReceiver) managedObject).receiveEvent(event);
+                        }
+                    }
+
+                }
+            } finally {
+                getLog().debug("Event dispatcher thread stopped.");
+            }
         }
     }
 
