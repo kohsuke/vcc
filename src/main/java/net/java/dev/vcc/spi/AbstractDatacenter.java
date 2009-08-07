@@ -10,6 +10,8 @@ import net.java.dev.vcc.api.Host;
 import net.java.dev.vcc.api.HostResourceGroup;
 import net.java.dev.vcc.api.ManagedObject;
 import net.java.dev.vcc.api.ManagedObjectId;
+import net.java.dev.vcc.api.Log;
+import net.java.dev.vcc.api.LogFactory;
 
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -26,11 +28,14 @@ public abstract class AbstractDatacenter
         extends AbstractManagedObject<Datacenter>
         implements Datacenter {
 
+    private final Log log;
+
     private final Map<Class<? extends ManagedObject>, Set<Class<? extends Command>>> capabilities;
 
-    public AbstractDatacenter(ManagedObjectId<Datacenter> id,
+    public AbstractDatacenter(LogFactory logFactory, ManagedObjectId<Datacenter> id,
                               Map.Entry<Class<? extends ManagedObject>, Set<Class<? extends Command>>>... capabilities) {
         super(id);
+        log = logFactory.getLog(getClass());
         Map<Class<? extends ManagedObject>, Set<Class<? extends Command>>> tmp =
                 new HashMap<Class<? extends ManagedObject>, Set<Class<? extends Command>>>(capabilities.length);
         for (Map.Entry<Class<? extends ManagedObject>, Set<Class<? extends Command>>> capability : capabilities) {
@@ -39,9 +44,10 @@ public abstract class AbstractDatacenter
         this.capabilities = Collections.unmodifiableMap(tmp);
     }
 
-    public AbstractDatacenter(ManagedObjectId<Datacenter> id, CapabilityProfile base,
+    public AbstractDatacenter(LogFactory logFactory, ManagedObjectId<Datacenter> id, CapabilityProfile base,
                               Map.Entry<Class<? extends ManagedObject>, Set<Class<? extends Command>>>... capabilities) {
         super(id);
+        log = logFactory.getLog(getClass());
         Map<Class<? extends ManagedObject>, Set<Class<? extends Command>>> tmp =
                 new HashMap<Class<? extends ManagedObject>, Set<Class<? extends Command>>>(capabilities.length);
         for (Map.Entry<Class<? extends ManagedObject>, Set<Class<? extends Command>>> capability : capabilities) {
@@ -57,8 +63,9 @@ public abstract class AbstractDatacenter
         this.capabilities = Collections.unmodifiableMap(tmp);
     }
 
-    public AbstractDatacenter(ManagedObjectId<Datacenter> id, boolean ignore, CapabilityProfile... bases) {
+    public AbstractDatacenter(LogFactory logFactory, ManagedObjectId<Datacenter> id, boolean ignore, CapabilityProfile... bases) {
         super(id);
+        log = logFactory.getLog(getClass());
         Map<Class<? extends ManagedObject>, Set<Class<? extends Command>>> tmp =
                 new HashMap<Class<? extends ManagedObject>, Set<Class<? extends Command>>>();
         for (CapabilityProfile base : bases) {
@@ -71,6 +78,10 @@ public abstract class AbstractDatacenter
             }
         }
         this.capabilities = Collections.unmodifiableMap(tmp);
+    }
+
+    public final Log getLog() {
+        return log;
     }
 
     /**

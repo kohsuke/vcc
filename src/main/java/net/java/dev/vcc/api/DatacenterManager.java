@@ -1,12 +1,13 @@
 package net.java.dev.vcc.api;
 
 import net.java.dev.vcc.spi.DatacenterConnection;
+import net.java.dev.vcc.spi.LogFactoryManager;
 import net.java.dev.vcc.util.ServiceLoaderCache;
+import net.java.dev.vcc.util.ServiceLoaderProxy;
 
 import java.io.IOException;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Iterator;
+import java.util.logging.LogManager;
 
 /**
  * The connection factory creates connections with which to control Virtual Computers and their Hosts.
@@ -40,7 +41,7 @@ public final class DatacenterManager {
      * @throws RuntimeException until we get our own exception for when we cannot get a connection.
      */
     public static Datacenter getConnection(String url, String username, char[] password) throws IOException {
-        return getConnection(getContextClassLoader(), url, username, password);
+        return getConnection(ServiceLoaderProxy.getContextClassLoader(), url, username, password);
     }
 
     /**
@@ -62,35 +63,10 @@ public final class DatacenterManager {
         while (i.hasNext()) {
             DatacenterConnection manager = i.next();
             if (manager.acceptsUrl(url)) {
-                return manager.connect(url, username, password);
+                return manager.connect(url, username, password, LogFactoryManager.getLogFactory(classLoader));
             }
         }
         throw new RuntimeException("give this a real exception"); // TODO
-    }
-
-
-    /**
-     * Method getContextClassLoader returns the contextClassLoader of the current thread.
-     *
-     * @return the contextClassLoader (type ClassLoader) of the current thread.
-     */
-    @SuppressWarnings("unchecked")
-    private static ClassLoader getContextClassLoader() {
-        return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
-            /** {@inheritDoc} */
-            public Object run() {
-                ClassLoader cl = null;
-                //try {
-                cl = Thread.currentThread().getContextClassLoader();
-                //} catch (SecurityException ex) { }
-
-                if (cl == null) {
-                    cl = ClassLoader.getSystemClassLoader();
-                }
-
-                return cl;
-            }
-        });
     }
 
 }

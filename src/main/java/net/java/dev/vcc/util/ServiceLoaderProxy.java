@@ -5,30 +5,53 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
- * Created by IntelliJ IDEA.
- * User: user
- * Date: 17-Sep-2008
- * Time: 08:08:32
- * To change this template use File | Settings | File Templates.
+ * A proxy for {@link net.java.dev.vcc.util.ServiceLoader} that uses either the native Java 6 service loader
+ * implementation or an internal implementation that works on Java 5.
  */
-public class ServiceLoaderProxy<S>
-        implements ServiceLoader<S> {
+public class ServiceLoaderProxy<S> implements ServiceLoader<S> {
+
+    /**
+     * The real {@link net.java.dev.vcc.util.ServiceLoader}
+     */
     private final ServiceLoader<S> delegate;
 
+    /**
+     * Creates a new {@link net.java.dev.vcc.util.ServiceLoader} instance that proxies for the specified delegate.
+     *
+     * @param delegate The real {@link net.java.dev.vcc.util.ServiceLoader}
+     */
     private ServiceLoaderProxy(ServiceLoader<S> delegate) {
         this.delegate = delegate;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void reload() {
         delegate.reload();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Iterator<S> iterator() {
         return delegate.iterator();
     }
 
+    /**
+     * Creates a new service loader for the given service type and class loader.
+     *
+     * @param service The interface or abstract class representing the service
+     * @param loader  The class loader to be used to load provider-configuration files and provider classes, or
+     *                <tt>null</tt> if the system class loader (or, failing that, the bootstrap class loader) is to be
+     *                used
+     *
+     * @return A new service loader
+     */
     @SuppressWarnings("unchecked")
     public static <S> ServiceLoaderProxy<S> load(Class<S> service, ClassLoader loader) {
         final Logger logger = Logger.getLogger(ServiceLoaderProxy.class.getName());
@@ -53,6 +76,33 @@ public class ServiceLoaderProxy<S>
         return new ServiceLoaderProxy<S>(new JDK5ServiceLoaderImpl<S>(service, loader));
     }
 
+    /**
+     * Method getContextClassLoader returns the contextClassLoader of the current thread.
+     *
+     * @return the contextClassLoader (type ClassLoader) of the current thread.
+     */
+    @SuppressWarnings("unchecked")
+    public static ClassLoader getContextClassLoader() {
+        return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
+            /** {@inheritDoc} */
+            public Object run() {
+                ClassLoader cl = null;
+                //try {
+                cl = Thread.currentThread().getContextClassLoader();
+                //} catch (SecurityException ex) { }
+
+                if (cl == null) {
+                    cl = ClassLoader.getSystemClassLoader();
+                }
+
+                return cl;
+            }
+        });
+    }
+
+    /**
+     * Thread safe lazy resource singleton initialization.
+     */
     private static class AdapterProvider {
         private static final Class<? extends ServiceLoader> provider = findProvider();
 
