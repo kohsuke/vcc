@@ -21,20 +21,7 @@ public abstract class AbstractManagedObject<T extends ManagedObject<T>> implemen
 
     @Override
     public final boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof AbstractManagedObject)) {
-            return false;
-        }
-
-        AbstractManagedObject that = (AbstractManagedObject) o;
-
-        if (!id.equals(that.id)) {
-            return false;
-        }
-
-        return true;
+        return this == o || (o instanceof AbstractManagedObject && id.equals(((AbstractManagedObject) o).id));
     }
 
     @Override
