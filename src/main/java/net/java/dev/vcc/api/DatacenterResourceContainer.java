@@ -7,18 +7,11 @@ import java.util.Set;
  */
 interface DatacenterResourceContainer {
     /**
-     * Gets all the hosts available for running virtual computers that are contained in this container.
+     * Gets all the computer templates that are contained in this container.
      *
-     * @return the hosts available for running virtual computers that are contained in this container.
+     * @return the computer templates that are contained in this container.
      */
-    Set<Host> getHosts();
-
-    /**
-     * Gets all the hosts available for running virtual computers that are contained in this container including children.
-     *
-     * @return the hosts available for running virtual computers that are contained in this container including children.
-     */
-    Set<Host> getAllHosts();
+    Set<ComputerTemplate> getComputerTemplates();
 
     /**
      * Gets alll the {@link DatacenterResourceGroup}s that are contained in this container.
@@ -28,11 +21,11 @@ interface DatacenterResourceContainer {
     Set<DatacenterResourceGroup> getDatacenterResourceGroups();
 
     /**
-     * Gets all the {@link DatacenterResourceGroup}s that are contained in this container including children.
+     * Gets all the hosts available for running virtual computers that are contained in this container.
      *
-     * @return the {@link DatacenterResourceGroup}s that are contained in this container including children.
+     * @return the hosts available for running virtual computers that are contained in this container.
      */
-    Set<DatacenterResourceGroup> getAllDatacenterResourceGroups();
+    Set<Host> getHosts();
 
     /**
      * Gets all the virtual computers that are contained in this container including children.
@@ -42,9 +35,34 @@ interface DatacenterResourceContainer {
     Set<Computer> getAllComputers();
 
     /**
-     * Gets all the {@link net.java.dev.vcc.api.HostResourceGroup}s that are contained in this container including children.
+     * Gets all the computer templates that are contained in this container including children.
      *
-     * @return the {@link net.java.dev.vcc.api.HostResourceGroup}s that are contained in this container including children.
+     * @return the computer templates that are contained in this container including children.
+     */
+    Set<ComputerTemplate> getAllComputerTemplates();
+
+    /**
+     * Gets all the {@link DatacenterResourceGroup}s that are contained in this container including children.
+     *
+     * @return the {@link DatacenterResourceGroup}s that are contained in this container including children.
+     */
+    Set<DatacenterResourceGroup> getAllDatacenterResourceGroups();
+
+    /**
+     * Gets all the {@link net.java.dev.vcc.api.HostResourceGroup}s that are contained in this container including
+     * children.
+     *
+     * @return the {@link net.java.dev.vcc.api.HostResourceGroup}s that are contained in this container including
+     *         children.
      */
     Set<HostResourceGroup> getAllHostResourceGroups();
+
+    /**
+     * Gets all the hosts available for running virtual computers that are contained in this container including
+     * children.
+     *
+     * @return the hosts available for running virtual computers that are contained in this container including
+     *         children.
+     */
+    Set<Host> getAllHosts();
 }

@@ -9,23 +9,10 @@ import java.util.concurrent.Future;
 public interface ComputerSnapshot extends ManagedObject<ComputerSnapshot> {
 
     /**
-     * Gets the name of the snapshot.
-     *
-     * @return the name of the snapshot.
-     */
-    String getName();
-
-    /**
-     * Gets the description of the snapshot.
-     *
-     * @return the description of the snapshot, or {@code null} if descriptions are not supported.
-     */
-    String getDescription();
-
-    /**
      * Attempts to rename the snapshot.
      *
      * @param name the new name.
+     *
      * @return a future for the operation which will return {@code Boolean.TRUE} if the operation was successful.
      */
     Future<Boolean> doRename(String name);
@@ -34,6 +21,7 @@ public interface ComputerSnapshot extends ManagedObject<ComputerSnapshot> {
      * Attempts to modify the description of the snapshot.
      *
      * @param description the new description.
+     *
      * @return a future for the operation which will return {@code Boolean.TRUE} if the operation was successful.
      */
     Future<Boolean> doSetDescription(String description);

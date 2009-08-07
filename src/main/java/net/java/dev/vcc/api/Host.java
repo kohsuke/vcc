@@ -7,6 +7,4 @@ package net.java.dev.vcc.api;
 public interface Host
         extends ManagedObject<Host>, HostResourceContainer {
 
-    String getName();
-
 }

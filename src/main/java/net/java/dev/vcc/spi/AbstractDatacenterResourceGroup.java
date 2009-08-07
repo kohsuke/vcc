@@ -1,6 +1,11 @@
 package net.java.dev.vcc.spi;
 
-import net.java.dev.vcc.api.*;
+import net.java.dev.vcc.api.Computer;
+import net.java.dev.vcc.api.ComputerTemplate;
+import net.java.dev.vcc.api.DatacenterResourceGroup;
+import net.java.dev.vcc.api.Host;
+import net.java.dev.vcc.api.HostResourceGroup;
+import net.java.dev.vcc.api.ManagedObjectId;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -14,6 +19,13 @@ public abstract class AbstractDatacenterResourceGroup
         implements DatacenterResourceGroup {
     protected AbstractDatacenterResourceGroup(ManagedObjectId<DatacenterResourceGroup> resourceGroupManagedObjectId) {
         super(resourceGroupManagedObjectId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Set<ComputerTemplate> getComputerTemplates() {
+        return Collections.emptySet();
     }
 
     /**
@@ -40,6 +52,20 @@ public abstract class AbstractDatacenterResourceGroup
         }
         for (Host host : getHosts()) {
             result.addAll(host.getAllComputers());
+        }
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Set<ComputerTemplate> getAllComputerTemplates() {
+        Set<ComputerTemplate> result = new HashSet<ComputerTemplate>(getComputerTemplates());
+        for (DatacenterResourceGroup group : getDatacenterResourceGroups()) {
+            result.addAll(group.getAllComputerTemplates());
+        }
+        for (Host host : getHosts()) {
+            result.addAll(host.getAllComputerTemplates());
         }
         return result;
     }
