@@ -16,6 +16,7 @@ public class ViDatacenterConnection implements DatacenterConnection {
 
     public AbstractDatacenter connect(String url, String username, char[] password, LogFactory logFactory) throws IOException {
         assert url.startsWith("vcc+vi+");
+        logFactory.getClass();
         try {
             ViConnection connection = new ViConnection(url.substring("vcc+vi+".length()), username, password);
             return new ViDatacenter(new ViDatacenterId(url), connection, logFactory);

@@ -7,6 +7,10 @@ import net.java.dev.vcc.util.CompletedFuture;
 import java.util.Collections;
 import java.util.Set;
 
+import com.vmware.vim25.VirtualMachineConfigInfo;
+import com.vmware.vim25.VirtualMachineRuntimeInfo;
+import com.vmware.vim25.VirtualMachineSnapshotInfo;
+
 final class ViComputerTemplate
         extends AbstractComputerTemplate {
 
@@ -17,7 +21,8 @@ final class ViComputerTemplate
     private String name;
 
     ViComputerTemplate(ViDatacenter datacenter, ViComputerTemplateId id, ViDatacenterResourceGroup parent,
-                       String name) {
+                       String name, VirtualMachineConfigInfo config, VirtualMachineRuntimeInfo runtime,
+                       VirtualMachineSnapshotInfo snapshot) {
         super(id);
         this.datacenter = datacenter;
         this.parent = parent;
