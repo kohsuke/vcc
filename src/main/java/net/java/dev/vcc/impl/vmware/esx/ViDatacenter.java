@@ -1,7 +1,5 @@
 package net.java.dev.vcc.impl.vmware.esx;
 
-import com.vmware.vim25.Event;
-import com.vmware.vim25.EventFilterSpec;
 import com.vmware.vim25.InvalidPropertyFaultMsg;
 import com.vmware.vim25.InvalidStateFaultMsg;
 import com.vmware.vim25.ManagedObjectReference;
@@ -12,12 +10,17 @@ import com.vmware.vim25.PropertySpec;
 import com.vmware.vim25.RuntimeFaultFaultMsg;
 import com.vmware.vim25.TraversalSpec;
 import com.vmware.vim25.VirtualMachineConfigInfo;
+import com.vmware.vim25.VirtualMachineRuntimeInfo;
+import com.vmware.vim25.VirtualMachineSnapshotInfo;
+import com.vmware.vim25.TaskEvent;
+import com.vmware.vim25.TaskInfo;
 import net.java.dev.vcc.api.Command;
 import net.java.dev.vcc.api.Computer;
 import net.java.dev.vcc.api.DatacenterResourceGroup;
 import net.java.dev.vcc.api.Host;
 import net.java.dev.vcc.api.LogFactory;
 import net.java.dev.vcc.api.PowerState;
+import net.java.dev.vcc.api.Success;
 import net.java.dev.vcc.api.profiles.BasicProfile;
 import net.java.dev.vcc.impl.vmware.esx.vim25.Helper;
 import net.java.dev.vcc.spi.AbstractDatacenter;
@@ -25,6 +28,7 @@ import net.java.dev.vcc.spi.AbstractManagedObject;
 import net.java.dev.vcc.util.CompletedFuture;
 import net.java.dev.vcc.util.DefaultPollingTask;
 import net.java.dev.vcc.util.TaskController;
+import net.java.dev.vcc.util.FutureReference;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,15 +39,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -76,10 +81,15 @@ final class ViDatacenter
     private final Map<String, AbstractManagedObject> model =
             Collections.synchronizedMap(new HashMap<String, AbstractManagedObject>());
 
-    private ViDatacenter.ViEventCollector eventCollector;
+    private final ViEventCollector eventCollector;
 
     private ManagedObjectReference rootFolder;
-    private ViDatacenter.ViEventDispatcher eventDispatcher;
+    private final ViEventDispatcher eventDispatcher;
+    private final ViTaskCollector taskCollector;
+
+    private ConcurrentMap<String, FutureReference> pendingTasks =
+            new ConcurrentHashMap<String, FutureReference>();
+
 
     ViDatacenter(ViDatacenterId id, ViConnection connection, LogFactory logFactory)
             throws RuntimeFaultFaultMsg, InvalidStateFaultMsg, InvalidPropertyFaultMsg {
@@ -89,8 +99,9 @@ final class ViDatacenter
         getLog().debug("Starting event collector");
 
         // 1. start collecting events
-        eventDispatcher = new ViEventDispatcher();
-        eventCollector = new ViEventCollector();
+        eventDispatcher = new ViEventDispatcher(this, logFactory);
+        eventCollector = new ViEventCollector(this, logFactory);
+        taskCollector = new ViTaskCollector(this, logFactory);
         connectionExecutor.submit(new DefaultPollingTask(taskController, eventCollector, 1, TimeUnit.SECONDS));
         try {
             getLog().debug("Getting datacenter inventory");
@@ -119,6 +130,8 @@ final class ViDatacenter
                             Helper.newPropertySpec("ManagedEntity", false, "parent"),
                             Helper.newPropertySpec("VirtualMachine", false, "resourcePool"),
                             Helper.newPropertySpec("VirtualMachine", false, "config"),
+                            Helper.newPropertySpec("VirtualMachine", false, "runtime"),
+                            Helper.newPropertySpec("VirtualMachine", false, "snapshot"),
                     },
                     new ObjectSpec[]{Helper.newObjectSpec(rootFolder, false, folderTraversalSpec)});
 
@@ -144,11 +157,16 @@ final class ViDatacenter
                 if ("VirtualMachine".equals(entityType)) {
                     VirtualMachineConfigInfo config = (VirtualMachineConfigInfo) Helper
                             .getDynamicProperty(entity, "config");
+                    VirtualMachineRuntimeInfo runtime = (VirtualMachineRuntimeInfo) Helper
+                            .getDynamicProperty(entity, "runtime");
+                    VirtualMachineSnapshotInfo snapshot = (VirtualMachineSnapshotInfo) Helper
+                            .getDynamicProperty(entity, "snapshot");
                     if (config != null && config.isTemplate()) {
                         entityMO = new ViComputerTemplate(this, new ViComputerTemplateId(getId(), entityObject), null,
-                                entityName);
+                                entityName, config, runtime, snapshot);
                     } else {
-                        entityMO = new ViComputer(this, new ViComputerId(getId(), entityObject), null, entityName);
+                        entityMO = new ViComputer(this, new ViComputerId(getId(), entityObject), null, entityName,
+                                config, runtime, snapshot);
                     }
                 } else if ("ComputeResource".equals(entityType)) {
                     entityMO = new ViHost(this, new ViHostId(getId(), entityObject), null, entityName);
@@ -206,7 +224,7 @@ final class ViDatacenter
             }
             this.model.putAll(model);
             for (Iterator<Map.Entry<String, Collection<AbstractManagedObject>>> it = waiting.entrySet().iterator();
-                    it.hasNext();) {
+                 it.hasNext();) {
                 Map.Entry<String, Collection<AbstractManagedObject>> waitingMOs = it.next();
                 if (proxyParents.containsKey(waitingMOs.getKey())) {
                     AbstractManagedObject parentMO;
@@ -231,6 +249,7 @@ final class ViDatacenter
 
             getLog().debug("Starting event dispatcher");
             connectionExecutor.submit(eventDispatcher);
+            connectionExecutor.submit(new DefaultPollingTask(taskController, taskCollector, 1, TimeUnit.SECONDS));
         } catch (RuntimeException e) {
             close();
             throw e;
@@ -447,6 +466,44 @@ final class ViDatacenter
         }
     }
 
+    ViConnection getConnection() {
+        return connection;
+    }
+
+    public ViEventCollector getEventCollector() {
+        return eventCollector;
+    }
+
+    public AbstractManagedObject getManagedObject(ManagedObjectReference value) {
+        return model.get(value.getValue());
+    }
+
+    void addPendingTask(Command command, ManagedObjectReference moRef) {
+        FutureReference<Success> value = new FutureReference<Success>();
+        pendingTasks.put(moRef.getValue(), value);
+        command.setSubmitted(value);
+    }
+
+    void processTask(TaskEvent taskEvent) {
+        processTask(taskEvent.getInfo());
+    }
+
+    public void processTask(TaskInfo taskInfo) {
+        FutureReference futureReference = pendingTasks.get(taskInfo.getTask().getValue());
+        if (futureReference != null) {
+            switch (taskInfo.getState()) {
+                case SUCCESS:
+                    futureReference.set(Success.getInstance());
+                    pendingTasks.remove(taskInfo.getTask().getValue());
+                    break;
+                case ERROR:
+                    futureReference.set(taskInfo.getError().getLocalizedMessage(), new Throwable());
+                    pendingTasks.remove(taskInfo.getTask().getValue());
+                    break;
+            }
+        }
+    }
+
     private static final class ResourceHolder {
         private static final Map<PowerState, Set<PowerState>> ALLOWED_TRANSITIONS;
 
@@ -486,80 +543,6 @@ final class ViDatacenter
         public boolean awaitDeactivated(long timeout, TimeUnit unit)
                 throws InterruptedException {
             return awaitClosing(timeout, unit);
-        }
-    }
-
-    private final class ViEventCollector implements Runnable {
-
-        private final ManagedObjectReference eventHistoryCollector;
-
-        private final Queue<Event> events = new ConcurrentLinkedQueue<Event>();
-
-        public ViEventCollector()
-                throws RuntimeFaultFaultMsg, InvalidStateFaultMsg {
-            this.eventHistoryCollector =
-                    connection.getProxy().createCollectorForEvents(connection.getServiceContent().getEventManager(),
-                            new EventFilterSpec());
-            connection.getProxy().resetCollector(eventHistoryCollector);
-        }
-
-        public void run() {
-            getLog().debug("Starting collecting events");
-            try {
-                boolean finished = false;
-                while (!isClosing() && !finished) {
-                    List<Event> events = null;
-                    try {
-                        events = connection.getProxy().readNextEvents(eventHistoryCollector, 100);
-                    }
-                    catch (RuntimeFaultFaultMsg e) {
-                        log(e);
-                        return;
-                    }
-                    if (events.isEmpty()) {
-                        finished = true;
-                    } else {
-                        this.events.addAll(events);
-                    }
-                }
-                if (isClosing() && finished) {
-                    this.events.add(new ClosingConnectionEvent());
-                }
-            } finally {
-                getLog().debug("Finished collecting events. Currently there are {0} events in the queue.",
-                        events.size());
-            }
-        }
-    }
-
-    private final static class ClosingConnectionEvent extends Event {
-
-    }
-
-    private final class ViEventDispatcher implements Runnable {
-
-        public void run() {
-            getLog().debug("Event dispatcher thread started.");
-            try {
-                while (!isClosing()) {
-                    final Event event = eventCollector.events.poll();
-                    if (event instanceof ClosingConnectionEvent) {
-                        getLog().debug("Received connection closing event");
-                        break;
-                    }
-                    ManagedObjectReference ref = null;
-                    // TODO look up the managed object from the event
-                    if (ref != null) {
-                        final AbstractManagedObject managedObject = model.get(ref.getValue());
-                        if (managedObject instanceof ViEventReceiver) {
-                            ((ViEventReceiver) managedObject).receiveEvent(event);
-                        }
-                    }
-
-                }
-            } finally {
-                getLog().debug("Event dispatcher thread stopped.");
-            }
         }
     }
 
