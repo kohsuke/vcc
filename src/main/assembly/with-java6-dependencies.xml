@@ -1,0 +1,28 @@
+<assembly>
+    <id>with-java6-dependencies</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <scope>runtime</scope>
+            <excludes>
+                <exclude>com.sun.xml.ws:jaxws-rt</exclude>
+                <exclude>javax.xml.ws:jaxws-api</exclude>
+                <exclude>javax.xml.bind:jaxb-api</exclude>
+                <exclude>com.sun.xml.bind:jaxb-impl</exclude>
+                <exclude>com.sun.xml.messaging.saaj:saaj-impl</exclude>
+                <exclude>javax.xml.soap:saaj-api</exclude>
+                <exclude>com.sun.xml.stream.buffer:streambuffer</exclude>
+                <exclude>javax.activation:activation</exclude>
+                <exclude>com.sun.xml.stream:sjsxp</exclude>
+                <exclude>javax.xml.stream:stax-api</exclude>
+                <exclude>org.jvnet.staxex:stax-ex</exclude>
+                <exclude>junit:junit</exclude>
+                <exclude>com.sun.org.apache.xml.internal:resolver</exclude>
+                <exclude>org.jvnet:mimepull</exclude>
+            </excludes>
+        </dependencySet>
+    </dependencySets>
+</assembly>

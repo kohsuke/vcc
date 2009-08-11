@@ -1,0 +1,43 @@
+<project name="vcc-ant-tasks" default="test" xmlns:vcc="urn:vcc">
+  <target name="initTaskDefs">
+    <classpath id="vcc-ant-tasks.classpath">
+        <pathelement path="vcc-ant-tasks-0.0.3.jar"/>
+        <pathelement path="vcc-api-tasks-0.0.3.jar"/>
+        <pathelement path="vcc-utils-tasks-0.0.3.jar"/>
+        <pathelement path="vcc-vmware-esx-impl-0.0.3.jar"/>
+        <pathelement path="vi-api-4.0.0-4.jar"/>
+    </classpath>
+    <typedef resource="net/java/dev/vcc/ant/antlib.xml" uri="urn:vcc"
+             classpathref="vcc-ant-tasks.classpath"/>
+  </target>
+
+  <target name="test" depends="initTaskDefs">
+    <vcc:list-computers datacenteruri="vcc+vi+https://vmwarehostname/sdk"
+                                     username="myusername"
+                                     password="secret"/>
+      <vcc:start-computer datacenteruri="vcc+vi+https://vmwarehostname/sdk"
+                                       username="myusername"
+                                       password="secret">
+          <computer name="My Computer Name"/>
+      </vcc:start-computer>
+      <vcc:suspend-computer datacenteruri="vcc+vi+https://vmwarehostname/sdk"
+                                       username="myusername"
+                                       password="secret">
+          <computer name="My Computer Name"/>
+          <computer name="Fred's Computer Name"/>
+      </vcc:suspend-computer>
+      <vcc:stop-computer datacenteruri="vcc+vi+https://vmwarehostname/sdk"
+                                       username="...."
+                                       password="....">
+          <computer name="My Computer Name"/>
+      </vcc:stop-computer>
+      <!-- not supported on VMware
+      <vcc:pause-computer datacenteruri="vcc+xen:...."
+                                       username="myusername"
+                                       password="secret">
+          <computer name="My Computer Name"/>
+      </vcc:pause-computer>
+      -->
+
+  </target>
+</project>
