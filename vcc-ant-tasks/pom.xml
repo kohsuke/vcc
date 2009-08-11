@@ -33,7 +33,7 @@
         <dependency>
             <groupId>net.java.dev.vcc</groupId>
             <artifactId>vcc-api</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
+            <version>0.0.3</version>
         </dependency>
         <dependency>
             <groupId>net.java.dev.vcc</groupId>
@@ -49,7 +49,7 @@
         <dependency>
             <groupId>net.java.dev.vcc</groupId>
             <artifactId>vcc-vmware-esx-impl</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
+            <version>0.0.3</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
