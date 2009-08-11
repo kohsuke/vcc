@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>vcc-ant-tasks</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Virtual Computer Control ANT Tasks</name>
@@ -28,6 +28,7 @@
           <groupId>ant</groupId>
           <artifactId>ant</artifactId>
           <version>1.6.2</version>
+          <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.java.dev.vcc</groupId>
@@ -36,10 +37,43 @@
         </dependency>
         <dependency>
             <groupId>net.java.dev.vcc</groupId>
+            <artifactId>vcc-utils</artifactId>
+            <version>0.0.3-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.vcc</groupId>
             <artifactId>vcc-vmware-esx-impl</artifactId>
             <version>0.0.3-SNAPSHOT</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/with-java6-dependencies.xml</descriptor>
+                        <descriptor>src/main/assembly/with-java5-dependencies.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
     
 </project>
