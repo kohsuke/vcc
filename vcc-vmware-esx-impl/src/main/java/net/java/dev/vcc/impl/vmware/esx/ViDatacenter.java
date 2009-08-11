@@ -43,9 +43,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -69,7 +67,7 @@ final class ViDatacenter
 
     private ViConnection connection;
 
-    private ExecutorService connectionExecutor = Executors.newCachedThreadPool(new ViThreadFactory());
+    private final ExecutorService connectionExecutor;
 
     private final Map<ViHostId, ViHost> hosts = Collections.synchronizedMap(new HashMap<ViHostId, ViHost>());
 
@@ -89,10 +87,11 @@ final class ViDatacenter
             new ConcurrentHashMap<String, ViTaskContinuation<?>>();
 
 
-    ViDatacenter(ViDatacenterId id, ViConnection connection, LogFactory logFactory)
+    ViDatacenter(ViDatacenterId id, ViConnection connection, LogFactory logFactory, ExecutorService executorService)
             throws RuntimeFaultFaultMsg, InvalidStateFaultMsg, InvalidPropertyFaultMsg {
         super(logFactory, id, BasicProfile.getInstance()); // TODO get capabilities
         this.connection = connection;
+        this.connectionExecutor = executorService;
 
         getLog().debug("Starting event collector");
 
@@ -541,21 +540,6 @@ final class ViDatacenter
                 throws InterruptedException {
             return awaitClosing(timeout, unit);
         }
-    }
-
-    private static class ViThreadFactory
-            implements ThreadFactory {
-        private final ThreadFactory delegate = Executors.defaultThreadFactory();
-
-        public Thread newThread(Runnable r) {
-            Thread result = delegate.newThread(r);
-            result.setName("VMwareESX-" + result.getName());
-            return result;
-        }
-    }
-
-    void log(Throwable t) {
-        // ignore for now;
     }
 
     @Override

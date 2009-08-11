@@ -92,7 +92,7 @@ public class SmokeTest {
 
     @Test
     public void jaxwsSendsTheFullRequest() throws Exception {
-        CrappyHttpServer server = new CrappyHttpServer(8080);
+        CrappyHttpServer server = new CrappyHttpServer(0);
         Thread thread = new Thread(server);
         thread.start();
         try {

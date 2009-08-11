@@ -51,7 +51,7 @@ public class SmokeTest {
         assumeThat(URL, notNullValue()); // need a test environment to run this test
         assumeThat(URL, is(not(""))); // need a test environment to run this test
 
-        final VimPortType proxy = ConnectionManager.getConnection(URL);
+        final VimPortType proxy = ConnectionManager.getConnection(URL, null);
         final ManagedObjectReference serviceInstance = ConnectionManager.getServiceInstance();
 
         ServiceContent serviceContent = proxy.retrieveServiceContent(serviceInstance);
@@ -111,7 +111,7 @@ public class SmokeTest {
         assumeThat(URL, notNullValue()); // need a test environment to run this test
         assumeThat(URL, is(not(""))); // need a test environment to run this test
 
-        final VimPortType proxy = ConnectionManager.getConnection(URL);
+        final VimPortType proxy = ConnectionManager.getConnection(URL, null);
         final ManagedObjectReference serviceInstance = ConnectionManager.getServiceInstance();
 
         ServiceContent serviceContent = proxy.retrieveServiceContent(serviceInstance);
@@ -246,12 +246,13 @@ public class SmokeTest {
 
     }
 
+    @Ignore("Long running")
     @Test
     public void watchEvents() throws Exception {
         assumeThat(URL, notNullValue()); // need a test environment to run this test
         assumeThat(URL, is(not(""))); // need a test environment to run this test
 
-        final VimPortType proxy = ConnectionManager.getConnection(URL);
+        final VimPortType proxy = ConnectionManager.getConnection(URL, null);
         final ManagedObjectReference serviceInstance = ConnectionManager.getServiceInstance();
 
         ServiceContent serviceContent = proxy.retrieveServiceContent(serviceInstance);
@@ -300,7 +301,7 @@ public class SmokeTest {
         assumeThat(URL, notNullValue()); // need a test environment to run this test
         assumeThat(URL, is(not(""))); // need a test environment to run this test
 
-        final VimPortType proxy = ConnectionManager.getConnection(URL);
+        final VimPortType proxy = ConnectionManager.getConnection(URL, null);
         final ManagedObjectReference serviceInstance = ConnectionManager.getServiceInstance();
 
         ServiceContent serviceContent = proxy.retrieveServiceContent(serviceInstance);
@@ -373,7 +374,7 @@ public class SmokeTest {
         assumeThat(URL, notNullValue()); // need a test environment to run this test
         assumeThat(URL, is(not(""))); // need a test environment to run this test
 
-        final VimPortType proxy = ConnectionManager.getConnection(URL);
+        final VimPortType proxy = ConnectionManager.getConnection(URL, null);
         final ManagedObjectReference serviceInstance = ConnectionManager.getServiceInstance();
 
         ServiceContent serviceContent = proxy.retrieveServiceContent(serviceInstance);
@@ -429,12 +430,12 @@ public class SmokeTest {
 
     @Test
     public void jaxwsSendsTheFullRequest() throws Exception {
-        CrappyHttpServer server = new CrappyHttpServer(8080);
+        CrappyHttpServer server = new CrappyHttpServer(0);
         Thread thread = new Thread(server);
         thread.start();
         try {
             final VimPortType proxy = ConnectionManager
-                    .getConnection("http://localhost:" + server.getLocalPort() + "/sdk");
+                    .getConnection("http://localhost:" + server.getLocalPort() + "/sdk", null);
             TraversalSpec resourcePoolTraversalSpec = Helper
                     .newTraversalSpec("resourcePoolTraversalSpec", "ResourcePool", "resourcePool", false,
                             Helper.newSelectionSpec("resourcePoolTraversalSpec"));

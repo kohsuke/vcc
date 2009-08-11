@@ -1,17 +1,16 @@
 package net.java.dev.vcc.impl.vmware.esx;
 
-import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.Event;
-import com.vmware.vim25.RuntimeFaultFaultMsg;
-import com.vmware.vim25.InvalidStateFaultMsg;
 import com.vmware.vim25.EventFilterSpec;
-
-import java.util.Queue;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import net.java.dev.vcc.api.LogFactory;
+import com.vmware.vim25.InvalidStateFaultMsg;
+import com.vmware.vim25.ManagedObjectReference;
+import com.vmware.vim25.RuntimeFaultFaultMsg;
 import net.java.dev.vcc.api.Log;
+import net.java.dev.vcc.api.LogFactory;
+
+import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Collects events and queues them up for later processing.
@@ -46,7 +45,7 @@ final class ViEventCollector implements Runnable {
                     events = viDatacenter.getConnection().getProxy().readNextEvents(eventHistoryCollector, 100);
                 }
                 catch (RuntimeFaultFaultMsg e) {
-                    viDatacenter.log(e);
+                    log.error(e, e.getMessage());
                     return;
                 }
                 if (events.isEmpty()) {

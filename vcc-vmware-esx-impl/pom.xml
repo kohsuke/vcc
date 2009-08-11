@@ -22,7 +22,6 @@
         <groupId>net.java.dev.vcc</groupId>
         <artifactId>vcc-parent</artifactId>
         <version>0.0.4</version>
-
     </parent>
 
     <artifactId>vcc-vmware-esx-impl</artifactId>
