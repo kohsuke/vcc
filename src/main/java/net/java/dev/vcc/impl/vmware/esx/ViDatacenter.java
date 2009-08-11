@@ -8,19 +8,18 @@ import com.vmware.vim25.ObjectSpec;
 import com.vmware.vim25.PropertyFilterSpec;
 import com.vmware.vim25.PropertySpec;
 import com.vmware.vim25.RuntimeFaultFaultMsg;
+import com.vmware.vim25.TaskEvent;
+import com.vmware.vim25.TaskInfo;
 import com.vmware.vim25.TraversalSpec;
 import com.vmware.vim25.VirtualMachineConfigInfo;
 import com.vmware.vim25.VirtualMachineRuntimeInfo;
 import com.vmware.vim25.VirtualMachineSnapshotInfo;
-import com.vmware.vim25.TaskEvent;
-import com.vmware.vim25.TaskInfo;
 import net.java.dev.vcc.api.Command;
 import net.java.dev.vcc.api.Computer;
 import net.java.dev.vcc.api.DatacenterResourceGroup;
 import net.java.dev.vcc.api.Host;
 import net.java.dev.vcc.api.LogFactory;
 import net.java.dev.vcc.api.PowerState;
-import net.java.dev.vcc.api.Success;
 import net.java.dev.vcc.api.profiles.BasicProfile;
 import net.java.dev.vcc.impl.vmware.esx.vim25.Helper;
 import net.java.dev.vcc.spi.AbstractDatacenter;
@@ -28,7 +27,6 @@ import net.java.dev.vcc.spi.AbstractManagedObject;
 import net.java.dev.vcc.util.CompletedFuture;
 import net.java.dev.vcc.util.DefaultPollingTask;
 import net.java.dev.vcc.util.TaskController;
-import net.java.dev.vcc.util.FutureReference;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,13 +40,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -87,8 +84,8 @@ final class ViDatacenter
     private final ViEventDispatcher eventDispatcher;
     private final ViTaskCollector taskCollector;
 
-    private ConcurrentMap<String, FutureReference> pendingTasks =
-            new ConcurrentHashMap<String, FutureReference>();
+    private ConcurrentMap<String, ViTaskContinuation<?>> pendingTasks =
+            new ConcurrentHashMap<String, ViTaskContinuation<?>>();
 
 
     ViDatacenter(ViDatacenterId id, ViConnection connection, LogFactory logFactory)
@@ -478,10 +475,9 @@ final class ViDatacenter
         return model.get(value.getValue());
     }
 
-    void addPendingTask(Command command, ManagedObjectReference moRef) {
-        FutureReference<Success> value = new FutureReference<Success>();
-        pendingTasks.put(moRef.getValue(), value);
-        command.setSubmitted(value);
+    void addPendingTask(Command command, ManagedObjectReference moRef, ViTaskContinuation<?> c) {
+        pendingTasks.put(moRef.getValue(), c);
+        command.setSubmitted(c.getFuture());
     }
 
     void processTask(TaskEvent taskEvent) {
@@ -489,15 +485,15 @@ final class ViDatacenter
     }
 
     public void processTask(TaskInfo taskInfo) {
-        FutureReference futureReference = pendingTasks.get(taskInfo.getTask().getValue());
-        if (futureReference != null) {
+        ViTaskContinuation<?> continuation = pendingTasks.get(taskInfo.getTask().getValue());
+        if (continuation != null) {
             switch (taskInfo.getState()) {
                 case SUCCESS:
-                    futureReference.set(Success.getInstance());
+                    continuation.onSuccess();
                     pendingTasks.remove(taskInfo.getTask().getValue());
                     break;
                 case ERROR:
-                    futureReference.set(taskInfo.getError().getLocalizedMessage(), new Throwable());
+                    continuation.onError(taskInfo.getError());
                     pendingTasks.remove(taskInfo.getTask().getValue());
                     break;
             }
