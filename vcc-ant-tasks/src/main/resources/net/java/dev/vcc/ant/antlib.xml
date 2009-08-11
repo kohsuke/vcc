@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<antlib>
+  <taskdef name="start-computer" classname="net.java.dev.vcc.ant.StartComputerTask"/>
+  <taskdef name="stop-computer" classname="net.java.dev.vcc.ant.StopComputerTask"/>
+  <taskdef name="suspend-computer" classname="net.java.dev.vcc.ant.SuspendComputerTask"/>
+  <taskdef name="pause-computer" classname="net.java.dev.vcc.ant.PauseComputerTask"/>
+  <taskdef name="list-computers" classname="net.java.dev.vcc.ant.ListComputersTask"/>
+</antlib>

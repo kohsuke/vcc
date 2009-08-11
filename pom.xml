@@ -22,7 +22,6 @@
         <groupId>net.java.dev.vcc</groupId>
         <artifactId>vcc-parent</artifactId>
         <version>0.0.4</version>
-
     </parent>
 
     <artifactId>vcc-pom</artifactId>
@@ -45,6 +44,7 @@
         <module>vcc-vmware-esx-impl</module>
         <module>vcc-libvirt-impl</module>
         <module>vcc-site</module>
+        <module>vcc-ant-tasks</module>
     </modules>
 
     <scm>
