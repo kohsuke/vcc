@@ -20,10 +20,10 @@
     <parent>
         <groupId>net.java.dev.vcc.thirdparty</groupId>
         <artifactId>thirdparty</artifactId>
-        <version>0.0.4-SNAPSHOT</version>
+        <version>0.0.4</version>
     </parent>
     <artifactId>vi-api</artifactId>
-    <version>4.0.0-4-SNAPSHOT</version>
+    <version>4.0.0-4</version>
     <packaging>jar</packaging>
 
     <name>VMware Virtual Infrastructure SDK for Java</name>
@@ -113,9 +113,8 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <replace dir="${project.build.directory}/jaxws/wsimport/java"
-                                         summary="true">
-                                    <include name="**/*.java"/>
+                                <replace dir="${project.build.directory}/jaxws/wsimport/java" summary="true">
+                                    <include name="**/*.java" />
                                     <replacetoken>.class.getResource(".");</replacetoken>
                                     <replacevalue>.class.getResource("");</replacevalue>
                                 </replace>
