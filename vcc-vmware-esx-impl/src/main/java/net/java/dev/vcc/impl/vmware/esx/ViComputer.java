@@ -10,7 +10,11 @@ import com.vmware.vim25.VmPoweredOffEvent;
 import com.vmware.vim25.VmPoweredOnEvent;
 import com.vmware.vim25.VmReconfiguredEvent;
 import com.vmware.vim25.VmResourcePoolMovedEvent;
+import com.vmware.vim25.VmResumingEvent;
+import com.vmware.vim25.VmStartingEvent;
+import com.vmware.vim25.VmStoppingEvent;
 import com.vmware.vim25.VmSuspendedEvent;
+import com.vmware.vim25.VmSuspendingEvent;
 import net.java.dev.vcc.api.Command;
 import net.java.dev.vcc.api.Computer;
 import net.java.dev.vcc.api.ComputerSnapshot;
@@ -25,6 +29,7 @@ import net.java.dev.vcc.api.commands.SuspendComputer;
 import net.java.dev.vcc.spi.AbstractComputer;
 import net.java.dev.vcc.spi.AbstractManagedObject;
 import net.java.dev.vcc.util.CompletedFuture;
+import net.java.dev.vcc.util.FutureReference;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -38,6 +43,8 @@ final class ViComputer extends AbstractComputer implements ViEventReceiver {
 
     private final ViDatacenter datacenter;
 
+    private final Object lock = new Object();
+
     private ViDatacenterResourceGroup parent;
 
     private String name;
@@ -45,6 +52,7 @@ final class ViComputer extends AbstractComputer implements ViEventReceiver {
     private VirtualMachineConfigInfo config;
     private VirtualMachineRuntimeInfo runtime;
     private VirtualMachineSnapshotInfo snapshot;
+    private FutureReference<PowerState> futureState = null;
 
     ViComputer(ViDatacenter datacenter, ManagedObjectId<Computer> id, ViDatacenterResourceGroup parent, String name,
                VirtualMachineConfigInfo config, VirtualMachineRuntimeInfo runtime,
@@ -80,20 +88,20 @@ final class ViComputer extends AbstractComputer implements ViEventReceiver {
     public <T extends Command> T execute(T command) {
         try {
             if (command instanceof StartComputer) {
-                datacenter.addPendingTask(command,
+                command.setSubmitted(datacenter.addPendingTask(
                         datacenter.getConnection().getProxy().powerOnVMTask(getId().getMORef(), null),
                         new SetPowerStateOnSuccess(VirtualMachinePowerState.POWERED_ON)
-                );
+                ));
             } else if (command instanceof StopComputer) {
-                datacenter.addPendingTask(command,
+                command.setSubmitted(datacenter.addPendingTask(
                         datacenter.getConnection().getProxy().powerOffVMTask(getId().getMORef()),
                         new SetPowerStateOnSuccess(VirtualMachinePowerState.POWERED_OFF)
-                );
+                ));
             } else if (command instanceof SuspendComputer) {
-                datacenter.addPendingTask(command,
+                command.setSubmitted(datacenter.addPendingTask(
                         datacenter.getConnection().getProxy().suspendVMTask((getId().getMORef())),
                         new SetPowerStateOnSuccess(VirtualMachinePowerState.SUSPENDED)
-                );
+                ));
             } else {
                 command.setSubmitted(new CompletedFuture("Unsupported command", new UnsupportedOperationException()));
             }
@@ -116,31 +124,44 @@ final class ViComputer extends AbstractComputer implements ViEventReceiver {
     }
 
     public PowerState getState() {
-        if (runtime == null || runtime.getPowerState() == null) {
-            return PowerState.STOPPED;
-        }
-        switch (runtime.getPowerState()) {
-            case POWERED_OFF:
+        synchronized (lock) {
+            if (runtime == null || runtime.getPowerState() == null) {
                 return PowerState.STOPPED;
-            case POWERED_ON:
-                return PowerState.RUNNING;
-            case SUSPENDED:
-                return PowerState.SUSPENDED;
-            default:
-                return PowerState.STOPPED;
+            }
+            switch (runtime.getPowerState()) {
+                case POWERED_OFF:
+                    return PowerState.STOPPED;
+                case POWERED_ON:
+                    return PowerState.RUNNING;
+                case SUSPENDED:
+                    return PowerState.SUSPENDED;
+                default:
+                    return PowerState.STOPPED;
+            }
         }
     }
 
     public boolean isStateChanging() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        synchronized (lock) {
+            if (futureState == null) {
+                return false;
+            }
+            if (futureState.isDone()) {
+                futureState = null;
+                return false;
+            }
+            return true;
+        }
     }
 
     public Future<PowerState> getFutureState() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        synchronized (lock) {
+            return futureState == null ? new CompletedFuture<PowerState>(getState()) : futureState;
+        }
     }
 
     public Set<ComputerSnapshot> getSnapshots() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return Collections.emptySet(); // TODO
     }
 
     public Set<Host> getAllowedHosts() {
@@ -148,11 +169,15 @@ final class ViComputer extends AbstractComputer implements ViEventReceiver {
     }
 
     public String getName() {
-        return name;
+        synchronized (lock) {
+            return name;
+        }
     }
 
     public String getDescription() {
-        return config == null ? null : config.getAnnotation();
+        synchronized (lock) {
+            return config == null ? null : config.getAnnotation();
+        }
     }
 
     @Override
@@ -161,45 +186,72 @@ final class ViComputer extends AbstractComputer implements ViEventReceiver {
     }
 
     void setParent(ViDatacenterResourceGroup parent) {
-        this.parent = parent;
+        synchronized (lock) {
+            this.parent = parent;
+        }
     }
 
     void setName(String name) {
-        this.name = name;
+        synchronized (lock) {
+            this.name = name;
+        }
     }
 
-    public synchronized void receiveEvent(Event event) {
-        if (event instanceof VmResourcePoolMovedEvent) {
-            VmResourcePoolMovedEvent rpMoved = (VmResourcePoolMovedEvent) event;
-            AbstractManagedObject oldParent = datacenter.getManagedObject(rpMoved.getOldParent().getResourcePool());
-            AbstractManagedObject newParent = datacenter.getManagedObject(rpMoved.getOldParent().getResourcePool());
-            if (oldParent instanceof ViHostResourceGroup) {
-                ((ViHostResourceGroup) oldParent).removeComputer(this);
-                datacenter.getLog().info("Removing {0} from {1}", this, oldParent);
-            } else if (oldParent instanceof ViHost) {
-                ((ViHost) oldParent).removeComputer(this);
-                datacenter.getLog().info("Removing {0} from {1}", this, oldParent);
-            } else {
-                datacenter.getLog().info("No old parent");
+    public void receiveEvent(Event event) {
+        synchronized (lock) {
+            if (event instanceof VmResourcePoolMovedEvent) {
+                VmResourcePoolMovedEvent rpMoved = (VmResourcePoolMovedEvent) event;
+                AbstractManagedObject oldParent = datacenter.getManagedObject(rpMoved.getOldParent().getResourcePool());
+                AbstractManagedObject newParent = datacenter.getManagedObject(rpMoved.getOldParent().getResourcePool());
+                if (oldParent instanceof ViHostResourceGroup) {
+                    ((ViHostResourceGroup) oldParent).removeComputer(this);
+                    datacenter.getLog().info("Removing {0} from {1}", this, oldParent);
+                } else if (oldParent instanceof ViHost) {
+                    ((ViHost) oldParent).removeComputer(this);
+                    datacenter.getLog().info("Removing {0} from {1}", this, oldParent);
+                } else {
+                    datacenter.getLog().info("No old parent");
+                }
+                if (newParent instanceof ViHostResourceGroup) {
+                    ((ViHostResourceGroup) newParent).addComputer(this);
+                    datacenter.getLog().info("Adding {0} to {1}", this, newParent);
+                } else if (newParent instanceof ViHost) {
+                    ((ViHost) newParent).addComputer(this);
+                    datacenter.getLog().info("Adding {0} to {1}", this, newParent);
+                } else {
+                    datacenter.getLog().info("No new parent");
+                }
+            } else if (event instanceof VmReconfiguredEvent) {
+                VmReconfiguredEvent reconf = (VmReconfiguredEvent) event;
+                // TODO update the new config spec
+            } else if (event instanceof VmPoweredOnEvent) {
+                setState(VirtualMachinePowerState.POWERED_ON);
+            } else if (event instanceof VmPoweredOffEvent) {
+                setState(VirtualMachinePowerState.POWERED_OFF);
+            } else if (event instanceof VmSuspendedEvent) {
+                setState(VirtualMachinePowerState.SUSPENDED);
+            } else if (event instanceof VmSuspendingEvent || event instanceof VmResumingEvent
+                    || event instanceof VmStartingEvent || event instanceof VmStoppingEvent) {
+                datacenter.getLog().info("{0} is changing state", this);
+                if (futureState == null || futureState.isDone()) {
+                    futureState = new FutureReference<PowerState>();
+                }
             }
-            if (newParent instanceof ViHostResourceGroup) {
-                ((ViHostResourceGroup) newParent).addComputer(this);
-                datacenter.getLog().info("Adding {0} to {1}", this, newParent);
-            } else if (newParent instanceof ViHost) {
-                ((ViHost) newParent).addComputer(this);
-                datacenter.getLog().info("Adding {0} to {1}", this, newParent);
-            } else {
-                datacenter.getLog().info("No new parent");
+        }
+    }
+
+    private void setState(VirtualMachinePowerState state) {
+        synchronized (lock) {
+            if (runtime.getPowerState().equals(state)) {
+                return;
             }
-        } else if (event instanceof VmReconfiguredEvent) {
-            VmReconfiguredEvent reconf = (VmReconfiguredEvent) event;
-            // TODO update the new config spec
-        } else if (event instanceof VmPoweredOnEvent) {
-            runtime.setPowerState(VirtualMachinePowerState.POWERED_ON);
-        } else if (event instanceof VmPoweredOffEvent) {
-            runtime.setPowerState(VirtualMachinePowerState.POWERED_OFF);
-        } else if (event instanceof VmSuspendedEvent) {
-            runtime.setPowerState(VirtualMachinePowerState.SUSPENDED);
+            runtime.setPowerState(state);
+            PowerState powerState = getState();
+            if (futureState != null && !futureState.isDone()) {
+                futureState.set(powerState);
+                futureState = null;
+            }
+            datacenter.getLog().info("{0} has changed state to {1}", this, powerState);
         }
     }
 
@@ -211,12 +263,13 @@ final class ViComputer extends AbstractComputer implements ViEventReceiver {
         }
 
         public void onSuccess() {
-            runtime.setPowerState(newState);
+            setState(newState);
             set(Success.getInstance());
         }
 
         public void onError(LocalizedMethodFault error) {
-            set(error.getLocalizedMessage(), new RemoteException(error.getLocalizedMessage()));
+            RemoteException remoteException = new RemoteException(error.getLocalizedMessage());
+            set(remoteException.getMessage(), remoteException);
         }
     }
 }

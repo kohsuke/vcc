@@ -2,26 +2,24 @@ package net.java.dev.vcc.impl.vmware.esx;
 
 import com.vmware.vim25.Event;
 import com.vmware.vim25.ManagedObjectReference;
-import com.vmware.vim25.VmResourcePoolMovedEvent;
-import com.vmware.vim25.ResourcePoolMovedEvent;
 import com.vmware.vim25.ResourcePoolEvent;
-import com.vmware.vim25.VmEvent;
 import com.vmware.vim25.TaskEvent;
-import net.java.dev.vcc.spi.AbstractManagedObject;
-import net.java.dev.vcc.api.LogFactory;
+import com.vmware.vim25.VmEvent;
 import net.java.dev.vcc.api.Log;
+import net.java.dev.vcc.api.LogFactory;
+import net.java.dev.vcc.spi.AbstractManagedObject;
 
 import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
 import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import java.io.StringWriter;
-import java.io.PrintWriter;
-import java.io.IOException;
 
 /**
  * Created by IntelliJ IDEA. User: connollys Date: Aug 10, 2009 Time: 1:25:21 PM To change this template use File |
@@ -48,11 +46,12 @@ final class ViEventDispatcher implements Runnable {
                     log.debug("Received connection closing event");
                     break;
                 }
+                log.debug("Received event: {0}", event.getClass());
                 ManagedObjectReference ref = null;
                 if (event instanceof VmEvent) {
                     ref = event.getVm().getVm();
                 } else if (event instanceof ResourcePoolEvent) {
-                    ref = ((ResourcePoolEvent)event).getResourcePool().getResourcePool();
+                    ref = ((ResourcePoolEvent) event).getResourcePool().getResourcePool();
                 } else if (event instanceof TaskEvent) {
                     viDatacenter.processTask((TaskEvent) event);
                 } else {
@@ -80,6 +79,7 @@ final class ViEventDispatcher implements Runnable {
             log.debug("Event dispatcher thread stopped.");
         }
     }
+
     public static String toString(Object bean)
             throws IntrospectionException, IllegalAccessException, InvocationTargetException {
         if (bean == null) {

@@ -44,6 +44,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
@@ -475,9 +476,9 @@ final class ViDatacenter
         return model.get(value.getValue());
     }
 
-    void addPendingTask(Command command, ManagedObjectReference moRef, ViTaskContinuation<?> c) {
+    <T> Future<T> addPendingTask(ManagedObjectReference moRef, ViTaskContinuation<T> c) {
         pendingTasks.put(moRef.getValue(), c);
-        command.setSubmitted(c.getFuture());
+        return c.getFuture();
     }
 
     void processTask(TaskEvent taskEvent) {
