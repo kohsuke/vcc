@@ -14,7 +14,7 @@
   limitations under the License.
 
 -->
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>net.java.dev.vcc</groupId>
@@ -24,7 +24,7 @@
     </parent>
 
     <artifactId>vcc-utils</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.3</version>
     <packaging>jar</packaging>
 
     <name>Virtual Computer Control Common Utility Classes</name>
@@ -33,10 +33,10 @@
     <description>Common Utility classes used by implementations of vcc-api</description>
 
     <scm>
-        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-utils/</connection>
-        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-utils/
+        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/vcc-utils-0.0.3</connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/vcc-utils-0.0.3
         </developerConnection>
-        <url>https://vcc.dev.java.net/source/browse/vcc/trunk/vcc-utils/
+        <url>https://vcc.dev.java.net/source/browse/vcc/tags/vcc-utils-0.0.3
         </url>
     </scm>
 
