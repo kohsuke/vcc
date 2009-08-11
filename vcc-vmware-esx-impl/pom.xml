@@ -47,17 +47,17 @@
         <dependency>
             <groupId>net.java.dev.vcc</groupId>
             <artifactId>vcc-api</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
+            <version>0.0.3</version>
         </dependency>
         <dependency>
             <groupId>net.java.dev.vcc</groupId>
             <artifactId>vcc-utils</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
+            <version>0.0.3</version>
         </dependency>
         <dependency>
             <groupId>net.java.dev.vcc.thirdparty</groupId>
             <artifactId>vi-api</artifactId>
-            <version>4.0.0-4-SNAPSHOT</version>
+            <version>4.0.0-4</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
