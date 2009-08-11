@@ -8,7 +8,7 @@
     </parent>
 
     <artifactId>vcc-ant-tasks</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Virtual Computer Control ANT Tasks</name>
@@ -17,9 +17,9 @@
     <description>The vcc-api ANT Tasks</description>
 
     <scm>
-        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/vcc-ant-tasks-0.0.1</connection>
-        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/vcc-ant-tasks-0.0.1</developerConnection>
-        <url>https://vcc.dev.java.net/source/browse/vcc/tags/vcc-ant-tasks-0.0.1</url>
+        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-ant-tasks/</connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-ant-tasks/</developerConnection>
+        <url>https://vcc.dev.java.net/source/browse/vcc/trunk/vcc-ant-tasks/</url>
     </scm>
 
     <dependencies>
