@@ -20,10 +20,10 @@
     <parent>
         <groupId>net.java.dev.vcc.thirdparty</groupId>
         <artifactId>thirdparty</artifactId>
-        <version>0.0.4</version>
+        <version>0.0.5-SNAPSHOT</version>
     </parent>
     <artifactId>vi-api</artifactId>
-    <version>4.0.0-4</version>
+    <version>4.0.0-5-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>VMware Virtual Infrastructure SDK for Java</name>

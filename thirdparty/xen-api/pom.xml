@@ -21,7 +21,7 @@
 
     <groupId>net.java.dev.vcc.thirdparty</groupId>
     <artifactId>xen-api</artifactId>
-    <version>5.0.0-6</version>
+    <version>5.0.0-7-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Citrix XenServer SDK for Java</name>
@@ -49,9 +49,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/thirdparty-0.0.4/xen-api</connection>
-        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/thirdparty-0.0.4/xen-api</developerConnection>
-        <url>https://vcc.dev.java.net/source/browse/vcc/tags/thirdparty-0.0.4/xen-api</url>
+        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/thirdparty/xen-api/</connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/thirdparty/xen-api/</developerConnection>
+        <url>https://vcc.dev.java.net/source/browse/vcc/trunk/thirdparty/xen-api/</url>
     </scm>
 
     <mailingLists>
