@@ -24,7 +24,7 @@
     </parent>
 
     <artifactId>vcc-vmware-esx-impl</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Virtual Computer Control VMware ESX implementation</name>
@@ -33,12 +33,12 @@
     <description>The VMware ESX implementation of vcc-api</description>
 
     <scm>
-        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/vcc-vmware-esx-impl-0.0.3
+        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-vmware-esx-impl/
         </connection>
-        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/vcc-vmware-esx-impl-0.0.3
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-vmware-esx-impl/
         </developerConnection>
         <url>
-            https://vcc.dev.java.net/source/browse/vcc/tags/vcc-vmware-esx-impl-0.0.3
+            https://vcc.dev.java.net/source/browse/vcc/trunk/vcc-vmware-esx-impl/
         </url>
     </scm>
 
