@@ -1,5 +1,16 @@
 package net.java.dev.vcc.impl.vmware.esx;
 
+import com.vmware.vim25.Event;
+import com.vmware.vim25.LocalizedMethodFault;
+import com.vmware.vim25.VirtualMachineConfigInfo;
+import com.vmware.vim25.VirtualMachinePowerState;
+import com.vmware.vim25.VirtualMachineRuntimeInfo;
+import com.vmware.vim25.VirtualMachineSnapshotInfo;
+import com.vmware.vim25.VmPoweredOffEvent;
+import com.vmware.vim25.VmPoweredOnEvent;
+import com.vmware.vim25.VmReconfiguredEvent;
+import com.vmware.vim25.VmResourcePoolMovedEvent;
+import com.vmware.vim25.VmSuspendedEvent;
 import net.java.dev.vcc.api.Command;
 import net.java.dev.vcc.api.Computer;
 import net.java.dev.vcc.api.ComputerSnapshot;
@@ -7,37 +18,21 @@ import net.java.dev.vcc.api.Host;
 import net.java.dev.vcc.api.ManagedObjectId;
 import net.java.dev.vcc.api.PowerState;
 import net.java.dev.vcc.api.Success;
+import net.java.dev.vcc.api.commands.RestartComputer;
 import net.java.dev.vcc.api.commands.StartComputer;
 import net.java.dev.vcc.api.commands.StopComputer;
 import net.java.dev.vcc.api.commands.SuspendComputer;
-import net.java.dev.vcc.api.commands.RestartComputer;
 import net.java.dev.vcc.spi.AbstractComputer;
 import net.java.dev.vcc.spi.AbstractManagedObject;
 import net.java.dev.vcc.util.CompletedFuture;
 
+import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Set;
 import java.util.concurrent.Future;
-
-import com.vmware.vim25.Event;
-import com.vmware.vim25.VmResourcePoolMovedEvent;
-import com.vmware.vim25.VmReconfiguredEvent;
-import com.vmware.vim25.VirtualMachineConfigInfo;
-import com.vmware.vim25.VirtualMachineRuntimeInfo;
-import com.vmware.vim25.VirtualMachineSnapshotInfo;
-import com.vmware.vim25.VmPoweredOnEvent;
-import com.vmware.vim25.VirtualMachinePowerState;
-import com.vmware.vim25.VmPoweredOffEvent;
-import com.vmware.vim25.VmSuspendedEvent;
-import com.vmware.vim25.FileFaultFaultMsg;
-import com.vmware.vim25.InsufficientResourcesFaultFaultMsg;
-import com.vmware.vim25.InvalidStateFaultMsg;
-import com.vmware.vim25.RuntimeFaultFaultMsg;
-import com.vmware.vim25.TaskInProgressFaultMsg;
-import com.vmware.vim25.VmConfigFaultFaultMsg;
 
 final class ViComputer extends AbstractComputer implements ViEventReceiver {
 
@@ -83,47 +78,27 @@ final class ViComputer extends AbstractComputer implements ViEventReceiver {
     }
 
     public <T extends Command> T execute(T command) {
-        if (command instanceof StartComputer) {
-            try {
-                datacenter.addPendingTask(command, datacenter.getConnection().getProxy().powerOnVMTask(getId().getMORef(), null)
+        try {
+            if (command instanceof StartComputer) {
+                datacenter.addPendingTask(command,
+                        datacenter.getConnection().getProxy().powerOnVMTask(getId().getMORef(), null),
+                        new SetPowerStateOnSuccess(VirtualMachinePowerState.POWERED_ON)
                 );
-            } catch (FileFaultFaultMsg e) {
-                ((StartComputer) command).setSubmitted(new CompletedFuture<Success>(e.getMessage(), e));
-            } catch (InsufficientResourcesFaultFaultMsg e) {
-                ((StartComputer) command).setSubmitted(new CompletedFuture<Success>(e.getMessage(), e));
-            } catch (InvalidStateFaultMsg e) {
-                ((StartComputer) command).setSubmitted(new CompletedFuture<Success>(e.getMessage(), e));
-            } catch (RuntimeFaultFaultMsg e) {
-                ((StartComputer) command).setSubmitted(new CompletedFuture<Success>(e.getMessage(), e));
-            } catch (TaskInProgressFaultMsg e) {
-                ((StartComputer) command).setSubmitted(new CompletedFuture<Success>(e.getMessage(), e));
-            } catch (VmConfigFaultFaultMsg e) {
-                ((StartComputer) command).setSubmitted(new CompletedFuture<Success>(e.getMessage(), e));
-            }
-        } else if (command instanceof StopComputer) {
-            try {
-                datacenter.addPendingTask(command, datacenter.getConnection().getProxy().powerOffVMTask(getId().getMORef())
+            } else if (command instanceof StopComputer) {
+                datacenter.addPendingTask(command,
+                        datacenter.getConnection().getProxy().powerOffVMTask(getId().getMORef()),
+                        new SetPowerStateOnSuccess(VirtualMachinePowerState.POWERED_OFF)
                 );
-            } catch (InvalidStateFaultMsg e) {
-                ((StopComputer) command).setSubmitted(new CompletedFuture<Success>(e.getMessage(), e));
-            } catch (RuntimeFaultFaultMsg e) {
-                ((StopComputer) command).setSubmitted(new CompletedFuture<Success>(e.getMessage(), e));
-            } catch (TaskInProgressFaultMsg e) {
-                ((StopComputer) command).setSubmitted(new CompletedFuture<Success>(e.getMessage(), e));
-            }
-        } else if (command instanceof SuspendComputer) {
-            try {
-                datacenter.addPendingTask(command, datacenter.getConnection().getProxy().suspendVMTask((getId().getMORef()))
+            } else if (command instanceof SuspendComputer) {
+                datacenter.addPendingTask(command,
+                        datacenter.getConnection().getProxy().suspendVMTask((getId().getMORef())),
+                        new SetPowerStateOnSuccess(VirtualMachinePowerState.SUSPENDED)
                 );
-            } catch (InvalidStateFaultMsg e) {
-                ((SuspendComputer) command).setSubmitted(new CompletedFuture<Success>(e.getMessage(), e));
-            } catch (RuntimeFaultFaultMsg e) {
-                ((SuspendComputer) command).setSubmitted(new CompletedFuture<Success>(e.getMessage(), e));
-            } catch (TaskInProgressFaultMsg e) {
-                ((SuspendComputer) command).setSubmitted(new CompletedFuture<Success>(e.getMessage(), e));
+            } else {
+                command.setSubmitted(new CompletedFuture("Unsupported command", new UnsupportedOperationException()));
             }
-        } else {
-            command.setSubmitted(new CompletedFuture("Unsupported command", new UnsupportedOperationException()));
+        } catch (Throwable e) {
+            command.setSubmitted(new CompletedFuture(e.getMessage(), e));
         }
         return command;
     }
@@ -225,6 +200,23 @@ final class ViComputer extends AbstractComputer implements ViEventReceiver {
             runtime.setPowerState(VirtualMachinePowerState.POWERED_OFF);
         } else if (event instanceof VmSuspendedEvent) {
             runtime.setPowerState(VirtualMachinePowerState.SUSPENDED);
+        }
+    }
+
+    private class SetPowerStateOnSuccess extends ViTaskContinuation<Success> {
+        private final VirtualMachinePowerState newState;
+
+        public SetPowerStateOnSuccess(VirtualMachinePowerState newState) {
+            this.newState = newState;
+        }
+
+        public void onSuccess() {
+            runtime.setPowerState(newState);
+            set(Success.getInstance());
+        }
+
+        public void onError(LocalizedMethodFault error) {
+            set(error.getLocalizedMessage(), new RemoteException(error.getLocalizedMessage()));
         }
     }
 }
