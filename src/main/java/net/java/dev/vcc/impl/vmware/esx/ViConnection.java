@@ -10,6 +10,7 @@ import com.vmware.vim25.VimPortType;
 import net.java.dev.vcc.impl.vmware.esx.vim25.ConnectionManager;
 
 import java.net.MalformedURLException;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Holds the connection to a VMware ESX server.
@@ -21,9 +22,9 @@ final class ViConnection {
     private final ManagedObjectReference serviceInstance;
     private final ServiceContent serviceContent;
 
-    public ViConnection(String url, String username, char[] password)
+    public ViConnection(String url, String username, char[] password, ExecutorService executor)
             throws MalformedURLException, RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg {
-        proxy = ConnectionManager.getConnection(url);
+        proxy = ConnectionManager.getConnection(url, executor);
         serviceInstance = ConnectionManager.getServiceInstance();
         serviceContent = proxy.retrieveServiceContent(serviceInstance);
         sessionManager = serviceContent.getSessionManager();

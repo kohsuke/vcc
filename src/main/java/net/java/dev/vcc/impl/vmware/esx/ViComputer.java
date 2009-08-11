@@ -205,21 +205,21 @@ final class ViComputer extends AbstractComputer implements ViEventReceiver {
                 AbstractManagedObject newParent = datacenter.getManagedObject(rpMoved.getOldParent().getResourcePool());
                 if (oldParent instanceof ViHostResourceGroup) {
                     ((ViHostResourceGroup) oldParent).removeComputer(this);
-                    datacenter.getLog().info("Removing {0} from {1}", this, oldParent);
+                    datacenter.getLog().debug("Removing {0} from {1}", this, oldParent);
                 } else if (oldParent instanceof ViHost) {
                     ((ViHost) oldParent).removeComputer(this);
-                    datacenter.getLog().info("Removing {0} from {1}", this, oldParent);
+                    datacenter.getLog().debug("Removing {0} from {1}", this, oldParent);
                 } else {
-                    datacenter.getLog().info("No old parent");
+                    datacenter.getLog().debug("No old parent");
                 }
                 if (newParent instanceof ViHostResourceGroup) {
                     ((ViHostResourceGroup) newParent).addComputer(this);
-                    datacenter.getLog().info("Adding {0} to {1}", this, newParent);
+                    datacenter.getLog().debug("Adding {0} to {1}", this, newParent);
                 } else if (newParent instanceof ViHost) {
                     ((ViHost) newParent).addComputer(this);
-                    datacenter.getLog().info("Adding {0} to {1}", this, newParent);
+                    datacenter.getLog().debug("Adding {0} to {1}", this, newParent);
                 } else {
-                    datacenter.getLog().info("No new parent");
+                    datacenter.getLog().debug("No new parent");
                 }
             } else if (event instanceof VmReconfiguredEvent) {
                 VmReconfiguredEvent reconf = (VmReconfiguredEvent) event;
@@ -232,7 +232,7 @@ final class ViComputer extends AbstractComputer implements ViEventReceiver {
                 setState(VirtualMachinePowerState.SUSPENDED);
             } else if (event instanceof VmSuspendingEvent || event instanceof VmResumingEvent
                     || event instanceof VmStartingEvent || event instanceof VmStoppingEvent) {
-                datacenter.getLog().info("{0} is changing state", this);
+                datacenter.getLog().debug("{0} is changing state", this);
                 if (futureState == null || futureState.isDone()) {
                     futureState = new FutureReference<PowerState>();
                 }

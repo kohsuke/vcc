@@ -1,5 +1,6 @@
 package net.java.dev.vcc.impl.vmware.esx;
 
+import com.vmware.vim25.ManagedObjectReference;
 import net.java.dev.vcc.api.Computer;
 import net.java.dev.vcc.api.ComputerTemplate;
 import net.java.dev.vcc.api.Datacenter;
@@ -10,12 +11,10 @@ import net.java.dev.vcc.api.PowerState;
 import net.java.dev.vcc.api.commands.StartComputer;
 import net.java.dev.vcc.api.commands.SuspendComputer;
 import net.java.dev.vcc.spi.LogFactoryManager;
-import net.java.dev.vcc.spi.AbstractManagedObject;
 import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 import static org.junit.Assume.*;
 import org.junit.*;
-import static org.junit.Assert.assertThat;
-import com.vmware.vim25.ManagedObjectReference;
 
 /**
  * Created by IntelliJ IDEA. User: connollys Date: Jul 30, 2009 Time: 12:57:24 PM To change this template use File |
@@ -73,18 +72,16 @@ public class SmokeTest {
         try {
             ManagedObjectReference value = new ManagedObjectReference();
             value.setType("VirtualMachine");
-            //value.setValue(""); //TODO feed me
+            //value.setValue("vm-5454"); //TODO feed me
             Computer computer = (Computer) ((ViDatacenter) datacenter).getManagedObject(value);
             assumeThat(computer, notNullValue());
             if (PowerState.RUNNING.equals(computer.getState())) {
                 System.out.println("Suspending computer");
                 computer.execute(new SuspendComputer()).get();
-                Thread.sleep(2000);
             }
             assertThat(computer.getState(), is(PowerState.SUSPENDED));
             System.out.println("Starting computer");
             computer.execute(new StartComputer()).get();
-            Thread.sleep(2000);
             assertThat(computer.getState(), is(PowerState.RUNNING));
             System.out.println("Done");
         } finally {
