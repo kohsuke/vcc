@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>net.java.dev.vcc</groupId>
@@ -9,7 +8,7 @@
     </parent>
 
     <artifactId>vcc-ant-tasks</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <packaging>jar</packaging>
 
     <name>Virtual Computer Control ANT Tasks</name>
@@ -18,9 +17,9 @@
     <description>The vcc-api ANT Tasks</description>
 
     <scm>
-        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-ant-tasks/</connection>
-        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-ant-tasks/</developerConnection>
-        <url>https://vcc.dev.java.net/source/browse/vcc/trunk/vcc-ant-tasks/</url>
+        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/vcc-ant-tasks-0.0.1</connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/vcc-ant-tasks-0.0.1</developerConnection>
+        <url>https://vcc.dev.java.net/source/browse/vcc/tags/vcc-ant-tasks-0.0.1</url>
     </scm>
 
     <dependencies>
@@ -33,12 +32,12 @@
         <dependency>
             <groupId>net.java.dev.vcc</groupId>
             <artifactId>vcc-api</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
+            <version>0.0.3</version>
         </dependency>
         <dependency>
             <groupId>net.java.dev.vcc</groupId>
             <artifactId>vcc-utils</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
+            <version>0.0.3</version>
             <exclusions>
                 <exclusion>
                     <groupId>junit</groupId>
@@ -49,7 +48,7 @@
         <dependency>
             <groupId>net.java.dev.vcc</groupId>
             <artifactId>vcc-vmware-esx-impl</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
+            <version>0.0.3</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
