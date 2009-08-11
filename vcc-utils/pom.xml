@@ -24,7 +24,7 @@
     </parent>
 
     <artifactId>vcc-utils</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Virtual Computer Control Common Utility Classes</name>
@@ -33,10 +33,10 @@
     <description>Common Utility classes used by implementations of vcc-api</description>
 
     <scm>
-        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/vcc-utils-0.0.3</connection>
-        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/tags/vcc-utils-0.0.3
+        <connection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-utils/</connection>
+        <developerConnection>scm:svn:https://svn.dev.java.net/svn/vcc/trunk/vcc-utils/
         </developerConnection>
-        <url>https://vcc.dev.java.net/source/browse/vcc/tags/vcc-utils-0.0.3
+        <url>https://vcc.dev.java.net/source/browse/vcc/trunk/vcc-utils/
         </url>
     </scm>
 
