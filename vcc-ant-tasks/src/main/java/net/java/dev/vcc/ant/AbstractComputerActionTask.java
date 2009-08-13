@@ -46,7 +46,7 @@ public abstract class AbstractComputerActionTask extends AbstractDatacenterTask 
         }
         Map<String, Future<Success>> results = new LinkedHashMap<String, Future<Success>>();
         for (Computer c : datacenter.getAllComputers()) {
-            if (targets.contains(c.getName().toString())) {
+            if (targets.contains(c.getName())) {
                 log("Computer " + c.getName() + " is in state " + c.getState(), Project.MSG_DEBUG);
                 results.put(c.getName(), doAction(c));
                 targets.remove(c.getName());
