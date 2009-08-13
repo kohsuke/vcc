@@ -6,6 +6,8 @@ import net.java.dev.vcc.util.ServiceLoaderCache;
 import net.java.dev.vcc.util.ServiceLoaderProxy;
 
 import java.io.IOException;
+import java.net.URLClassLoader;
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -68,6 +70,13 @@ public final class DatacenterManager {
         StringBuilder managers = new StringBuilder();
         Iterator<DatacenterConnection> i = cache.get(classLoader).iterator();
         if (!i.hasNext()) {
+            if (classLoader instanceof URLClassLoader) {
+                throw new IOException(
+                        "Could not find any providers from the classloader: " + classLoader + " with classpath "
+                                + Arrays
+                                .asList(((URLClassLoader) classLoader).getURLs()));
+
+            }
             throw new IOException("Could not find any providers from the classloader: " + classLoader);
         }
         while (i.hasNext()) {
