@@ -1,22 +1,21 @@
 package net.java.dev.vcc.ant;
 
+import net.java.dev.vcc.api.Computer;
 import net.java.dev.vcc.api.Datacenter;
 import net.java.dev.vcc.api.Success;
-import net.java.dev.vcc.api.Computer;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.LinkedHashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -41,13 +40,13 @@ public abstract class AbstractComputerActionTask extends AbstractDatacenterTask 
             throws BuildException {
         Set<String> targets = new HashSet<String>();
         if (computers != null) {
-            for (ComputerElement c: computers) {
+            for (ComputerElement c : computers) {
                 targets.add(c.getName());
             }
         }
         Map<String, Future<Success>> results = new LinkedHashMap<String, Future<Success>>();
         for (Computer c : datacenter.getAllComputers()) {
-            if (targets.contains(c.getId().toString())) {
+            if (targets.contains(c.getName().toString())) {
                 log("Computer " + c.getName() + " is in state " + c.getState(), Project.MSG_DEBUG);
                 results.put(c.getName(), doAction(c));
                 targets.remove(c.getName());
