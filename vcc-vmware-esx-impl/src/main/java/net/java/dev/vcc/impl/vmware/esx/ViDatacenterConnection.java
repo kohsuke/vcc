@@ -40,6 +40,7 @@ public class ViDatacenterConnection implements DatacenterConnection {
         public Thread newThread(Runnable r) {
             Thread result = delegate.newThread(r);
             result.setName("VMwareESX-" + result.getName());
+            result.setDaemon(true);
             return result;
         }
     }
