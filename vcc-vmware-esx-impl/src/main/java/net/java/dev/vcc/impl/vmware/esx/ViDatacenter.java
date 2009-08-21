@@ -490,11 +490,11 @@ final class ViDatacenter
             switch (taskInfo.getState()) {
                 case SUCCESS:
                     continuation.onSuccess();
-                    pendingTasks.remove(taskInfo.getTask().getValue());
+                    pendingTasks.remove(taskInfo.getTask().getValue(), continuation);
                     break;
                 case ERROR:
                     continuation.onError(taskInfo.getError());
-                    pendingTasks.remove(taskInfo.getTask().getValue());
+                    pendingTasks.remove(taskInfo.getTask().getValue(), continuation);
                     break;
             }
         }
