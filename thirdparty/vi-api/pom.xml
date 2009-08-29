@@ -85,6 +85,32 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-versions</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <!-- see MCOMPILER-71, otherwise we could use [1.5.0-1,1.6.0-0),[1.6.0-7,) -->
+                                <!-- note we cannot use [1.6.0-0,1.6.0-7) as these do not allow replacing -->
+                                <!-- the built in JAXWS 2.0 with JAXWS 2.1 -->
+                                <requireJavaVersion>
+                                    <message>
+                                         MCOMPILER-71 prevents compilation with Java 1.5. JAXWS replacement 
+                                         is only supported in Java 1.6 after build 7.
+                                    </message>
+                                    <version>[1.6.0-7,)</version>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jaxws-maven-plugin</artifactId>
                 <version>1.10</version>
