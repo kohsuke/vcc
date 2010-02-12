@@ -45,6 +45,7 @@
         <module>vcc-libvirt-impl</module>
         <module>vcc-site</module>
         <module>vcc-ant-tasks</module>
+        <module>vcc-vbox-impl</module>
     </modules>
 
     <scm>
