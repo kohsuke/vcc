@@ -12,6 +12,8 @@ https://svn.java.net/svn/vcc~svn/tags/thirdparty-0.0.4
 287-343
 https://svn.java.net/svn/vcc~svn/tags/vcc-ant-tasks-0.0.1
 305-343
+https://svn.java.net/svn/vcc~svn/tags/vcc-api-0.0.3
+291-343
 https://svn.java.net/svn/vcc~svn/trunk
 1-343
 https://svn.java.net/svn/vcc~svn/trunk/thirdparty
@@ -20,3 +22,5 @@ https://svn.java.net/svn/vcc~svn/trunk/thirdparty/collection-setter-injector
 230-233
 https://svn.java.net/svn/vcc~svn/trunk/vcc-ant-tasks
 289-301
+https://svn.java.net/svn/vcc~svn/trunk/vcc-api
+5-289
