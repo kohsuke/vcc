@@ -22,6 +22,8 @@ https://svn.java.net/svn/vcc~svn/tags/vcc-parent-0.0.3
 211-343
 https://svn.java.net/svn/vcc~svn/tags/vcc-parent-0.0.4
 242-343
+https://svn.java.net/svn/vcc~svn/tags/vcc-utils-0.0.3
+294-343
 https://svn.java.net/svn/vcc~svn/trunk
 1-343
 https://svn.java.net/svn/vcc~svn/trunk/thirdparty
@@ -32,5 +34,9 @@ https://svn.java.net/svn/vcc~svn/trunk/vcc-ant-tasks
 289-301
 https://svn.java.net/svn/vcc~svn/trunk/vcc-api
 5-289
+https://svn.java.net/svn/vcc~svn/trunk/vcc-msvm-impl
+8-46
 https://svn.java.net/svn/vcc~svn/trunk/vcc-parent
 5-239
+https://svn.java.net/svn/vcc~svn/trunk/vcc-utils
+52-285
