@@ -26,12 +26,16 @@ https://svn.java.net/svn/vcc~svn/tags/vcc-utils-0.0.3
 294-343
 https://svn.java.net/svn/vcc~svn/tags/vcc-vmware-esx-impl-0.0.3
 298-343
+https://svn.java.net/svn/vcc~svn/tags/xen-api-5.0.0-3
+146-343
 https://svn.java.net/svn/vcc~svn/trunk
 1-343
 https://svn.java.net/svn/vcc~svn/trunk/thirdparty
 29-285
 https://svn.java.net/svn/vcc~svn/trunk/thirdparty/collection-setter-injector
 230-233
+https://svn.java.net/svn/vcc~svn/trunk/thirdparty/xen-api
+29-140
 https://svn.java.net/svn/vcc~svn/trunk/vcc-ant-tasks
 289-301
 https://svn.java.net/svn/vcc~svn/trunk/vcc-api
