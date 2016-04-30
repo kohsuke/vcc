@@ -24,6 +24,8 @@ https://svn.java.net/svn/vcc~svn/tags/vcc-parent-0.0.4
 242-343
 https://svn.java.net/svn/vcc~svn/tags/vcc-utils-0.0.3
 294-343
+https://svn.java.net/svn/vcc~svn/tags/vcc-vmware-esx-impl-0.0.3
+298-343
 https://svn.java.net/svn/vcc~svn/trunk
 1-343
 https://svn.java.net/svn/vcc~svn/trunk/thirdparty
@@ -40,3 +42,5 @@ https://svn.java.net/svn/vcc~svn/trunk/vcc-parent
 5-239
 https://svn.java.net/svn/vcc~svn/trunk/vcc-utils
 52-285
+https://svn.java.net/svn/vcc~svn/trunk/vcc-vmware-esx-impl
+5-285
